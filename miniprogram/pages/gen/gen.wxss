@@ -1,0 +1,20 @@
+.flow.gen { display: flex; flex-direction: column; min-height: 100vh; background: #fff; }
+.topbar { display: flex; align-items: center; padding: 0 32rpx; height: 88rpx; }
+.gen-exit { margin-left: auto; font-size: 26rpx; color: var(--ink-3); letter-spacing: .04em; padding: 12rpx 8rpx; }
+.exit-press { opacity: .6; }
+
+.gen-body { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 80rpx; }
+.gen-orb {
+  width: 180rpx; height: 180rpx; border-radius: 50%;
+  border: 3rpx solid #1c1b1a; position: relative;
+  margin-bottom: 84rpx; animation: breathe 2.6s ease-in-out infinite;
+}
+.gen-orb::before, .gen-orb::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; border: 1rpx solid var(--line);
+}
+.gen-orb::before { animation: ripple 2.6s ease-out infinite; }
+.gen-orb::after { animation: ripple 2.6s ease-out infinite 1.3s; }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(.9); } }
+@keyframes ripple { 0% { transform: scale(1); opacity: .6; } 100% { transform: scale(1.9); opacity: 0; } }
+.gen-text { font-family: var(--serif); font-size: 36rpx; color: var(--ink); line-height: 1.7; transition: opacity .5s; }
+.gen-sub { margin-top: 28rpx; font-size: 24rpx; color: var(--ink-3); letter-spacing: .08em; }

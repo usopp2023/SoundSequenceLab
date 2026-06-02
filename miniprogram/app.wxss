@@ -1,0 +1,72 @@
+/* =========================================================
+   全局设计 token + 通用类。照搬原型 :root 与公共样式，px→rpx(×2)。
+   燕麦白底 + 中性灰阶 + 赤陶点缀。标题衬线 / 正文无衬线。
+   ========================================================= */
+page {
+  --bg: #ffffff;
+  --ink: #1c1b1a;
+  --ink-2: #6b6864;
+  --ink-3: #9a9792;
+  --line: #dcdad5;
+  --line-2: #eeece8;
+  --fill: #f0eeea;
+  --terra: #b5613f;       /* 赤陶点缀 */
+  --radius: 36rpx;
+  --serif: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
+  --sans: "PingFang SC", "Noto Sans CJK SC", "Source Han Sans SC", sans-serif;
+  --shadow: 0 2rpx 4rpx rgba(0,0,0,.04), 0 16rpx 48rpx rgba(0,0,0,.05);
+
+  background: var(--bg);
+  font-family: var(--sans);
+  color: var(--ink);
+  font-size: 28rpx;
+}
+
+view, text, scroll-view, button, input, textarea, image { box-sizing: border-box; }
+
+/* —— 文本工具 —— */
+.display { font-family: var(--serif); font-weight: 600; }
+.muted { color: var(--ink-2); }
+.faint { color: var(--ink-3); }
+.center { text-align: center; }
+.placeholder-note { font-size: 20rpx; color: #c8c5c0; letter-spacing: .08em; }
+
+/* —— 主按钮 —— */
+.btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; padding: 32rpx; border-radius: 999rpx;
+  font-size: 32rpx; font-weight: 500; letter-spacing: .06em;
+  background-color: #1c1b1a; color: #fff;
+  line-height: 1; border: none;
+  transition: transform .15s, opacity .15s;
+}
+.btn::after { border: none; }
+.btn.active-press { transform: scale(.985); opacity: .9; }
+.btn.ghost { background-color: #fff; color: #1c1b1a; border: 2rpx solid var(--line); }
+.btnrow { display: flex; gap: 24rpx; }
+.btnrow .btn { flex: 1; }
+
+/* —— 品牌氛围圈（home / about 复用）—— */
+.ambient {
+  width: 240rpx; height: 240rpx; border-radius: 50%;
+  border: 2rpx solid var(--line); position: relative;
+}
+.ambient::after {
+  content: ""; position: absolute; left: 36rpx; right: 36rpx; top: 36rpx; bottom: 36rpx;
+  border-radius: 50%; border: 2rpx solid var(--line-2);
+}
+
+/* —— 占位图框（结果/分享/活动主视觉等复用）—— */
+.ph-box {
+  border-radius: var(--radius); background: var(--fill);
+  border: 3rpx dashed #cbc8c2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 20rpx; color: #a8a5a0;
+}
+
+/* —— 滚动容器 —— */
+.page-scroll { height: 100vh; }
+.pad { padding: 0 52rpx; }
+
+/* Tab 页底部留白，避免内容被固定 TabBar 遮挡 */
+.tabpage-pad { padding-bottom: calc(150rpx + env(safe-area-inset-bottom)); }

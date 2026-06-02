@@ -1,0 +1,14 @@
+.invite-page { min-height: 100vh; background: #fff; display: flex; flex-direction: column; }
+.invite-wrap { flex: 1; padding: 80rpx 68rpx 0; text-align: center; display: flex; flex-direction: column; align-items: center; }
+.invite-avs { display: flex; align-items: center; gap: 28rpx; margin-bottom: 60rpx; }
+.invite-avs .ia { width: 120rpx; height: 120rpx; border-radius: 50%; background: var(--fill); border: 1rpx solid var(--line); }
+.invite-avs .ia-q {
+  width: 120rpx; height: 120rpx; border-radius: 50%; border: 3rpx dashed #cbc8c2; color: #a8a5a0;
+  font-family: var(--serif); font-size: 52rpx; display: flex; align-items: center; justify-content: center;
+}
+.invite-title { font-size: 48rpx; line-height: 1.6; color: var(--ink); }
+.br { display: block; height: 0; }
+.invite-sub { font-size: 28rpx; color: var(--ink-2); line-height: 1.9; margin-top: 40rpx; }
+.invite-from { margin-top: 52rpx; font-size: 24rpx; color: var(--ink-3); }
+.invite-from .b { color: var(--ink-2); font-weight: 500; }
+.invite-foot { padding: 32rpx 52rpx 60rpx; }

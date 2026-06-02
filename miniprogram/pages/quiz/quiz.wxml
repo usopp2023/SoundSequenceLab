@@ -1,0 +1,46 @@
+<view class="flow">
+  <!-- 自定义顶栏：返回（上一题 / 退出活动）-->
+  <view class="topbar" style="padding-top:{{statusBar}}px">
+    <view class="back" hover-class="back-press" bindtap="quizBack">‹</view>
+  </view>
+
+  <!-- 进度 -->
+  <view class="progress">
+    <view wx:for="{{questions}}" wx:key="idx" class="seg {{index <= qi ? 'on' : ''}}"></view>
+  </view>
+
+  <view class="q-wrap">
+    <view class="q-index">{{q.idx}}</view>
+    <view class="q-text">{{q.text}}</view>
+    <view class="q-hint">{{q.hint}}</view>
+
+    <!-- 语音输入区（默认）-->
+    <view wx:if="{{mode === 'voice'}}" class="voice-area">
+      <view class="voice-stage">
+        <view class="mic-btn {{recording ? 'rec' : ''}}" hover-class="mic-press" bindtap="toggleRec">
+          <view class="mic-ic"></view>
+        </view>
+        <view class="voice-waves {{recording ? 'on' : ''}}">
+          <view class="vw" wx:for="{{[0,1,2,3,4,5,6]}}" wx:key="*this"></view>
+        </view>
+        <view class="voice-hint">{{voiceHint}}</view>
+        <view wx:if="{{showTimer}}" class="voice-timer">{{recSecLabel}}</view>
+      </view>
+      <view wx:if="{{showResult}}" class="voice-result">
+        <view class="vr-label faint">识别到（可修改）</view>
+        <textarea class="vr-text" value="{{voiceText}}" bindinput="onVoiceInput" auto-height />
+      </view>
+      <view class="switch-input" bindtap="useType">不方便说话？改用打字 →</view>
+    </view>
+
+    <!-- 打字输入区（备选）-->
+    <view wx:else class="type-area">
+      <textarea class="q-input" placeholder="{{q.ph}}" value="{{typeText}}" bindinput="onTypeInput" />
+      <view class="switch-input" bindtap="useVoice">← 改用语音</view>
+    </view>
+  </view>
+
+  <view class="q-foot">
+    <button class="btn" hover-class="active-press" bindtap="quizNext">{{nextLabel}}</button>
+  </view>
+</view>

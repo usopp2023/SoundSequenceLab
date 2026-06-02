@@ -1,0 +1,28 @@
+<!-- 双层 TabBar：品牌层(实验室/我的) ↔ 活动层(活动主页/广场/我的活动)。
+     layer 由 app.globalData.navLayer 决定，页面 onShow 调 getTabBar().update() 同步。 -->
+<view class="tabbar">
+  <block wx:if="{{layer === 'activity'}}">
+    <view
+      wx:for="{{activity}}"
+      wx:key="key"
+      class="tab {{selected === item.path ? 'on' : ''}}"
+      data-path="{{item.path}}"
+      bindtap="onTap"
+    >
+      <view class="tab-ic ic-{{item.ic}} {{selected === item.path ? 'on' : 'off'}}"></view>
+      <view class="tab-lb">{{item.text}}</view>
+    </view>
+  </block>
+  <block wx:else>
+    <view
+      wx:for="{{brand}}"
+      wx:key="key"
+      class="tab {{selected === item.path ? 'on' : ''}}"
+      data-path="{{item.path}}"
+      bindtap="onTap"
+    >
+      <view class="tab-ic ic-{{item.ic}} {{selected === item.path ? 'on' : 'off'}}"></view>
+      <view class="tab-lb">{{item.text}}</view>
+    </view>
+  </block>
+</view>

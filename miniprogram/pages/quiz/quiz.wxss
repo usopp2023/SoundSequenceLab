@@ -1,0 +1,64 @@
+.flow { display: flex; flex-direction: column; min-height: 100vh; background: #fff; }
+
+.topbar { display: flex; align-items: center; padding: 0 16rpx; height: 88rpx; }
+.back { width: 64rpx; height: 64rpx; display: flex; align-items: center; justify-content: center; font-size: 44rpx; color: var(--ink-2); border-radius: 50%; }
+.back-press { background: var(--line-2); }
+
+.progress { display: flex; gap: 12rpx; padding: 12rpx 52rpx 0; }
+.seg { flex: 1; height: 6rpx; border-radius: 4rpx; background: var(--line); }
+.seg.on { background: #1c1b1a; }
+
+.q-wrap { flex: 1; display: flex; flex-direction: column; padding: 68rpx 52rpx 52rpx; }
+.q-index { font-size: 24rpx; color: var(--ink-3); letter-spacing: .22em; margin-bottom: 40rpx; }
+.q-text { font-family: var(--serif); font-size: 46rpx; line-height: 1.7; color: var(--ink); font-weight: 600; }
+.q-hint { margin-top: 28rpx; font-size: 26rpx; color: var(--ink-2); line-height: 1.8; }
+
+/* 打字 */
+.type-area { flex: 1; display: flex; flex-direction: column; }
+.q-input {
+  margin-top: 48rpx; flex: 1; width: 100%;
+  font-family: var(--serif); font-size: 36rpx; line-height: 1.9; color: var(--ink);
+  border-bottom: 1rpx solid var(--line); padding-bottom: 24rpx; min-height: 220rpx;
+}
+.q-input-ph { color: #cfccc7; font-family: var(--sans); font-size: 30rpx; }
+
+/* 语音 */
+.voice-area { flex: 1; display: flex; flex-direction: column; }
+.voice-stage { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40rpx 0; }
+.mic-btn {
+  width: 168rpx; height: 168rpx; border-radius: 50%;
+  background-color: #1c1b1a;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .15s;
+}
+.mic-press { transform: scale(.94); }
+.mic-ic {
+  width: 68rpx; height: 68rpx;
+  background-repeat: no-repeat; background-position: center; background-size: 68rpx 68rpx;
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9IjEuNiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSI5IiB5PSIzIiB3aWR0aD0iNiIgaGVpZ2h0PSIxMSIgcng9IjMiLz48cGF0aCBkPSJNNSAxMWE3IDcgMCAwIDAgMTQgME0xMiAxOHYzIi8+PC9zdmc+");
+}
+.mic-btn.rec { background-color: #b5613f; animation: micpulse 1.4s ease-in-out infinite; }
+@keyframes micpulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(181, 97, 63, .4); }
+  50% { box-shadow: 0 0 0 32rpx rgba(181, 97, 63, 0); }
+}
+.voice-waves { display: none; align-items: flex-end; gap: 6rpx; height: 60rpx; margin-top: 44rpx; }
+.voice-waves.on { display: flex; }
+.vw { width: 6rpx; background: var(--ink-3); border-radius: 6rpx; height: 30%; animation: vw .8s ease-in-out infinite; }
+.vw:nth-child(2n) { animation-delay: .15s; }
+.vw:nth-child(3n) { animation-delay: .3s; }
+.vw:nth-child(4n) { animation-delay: .45s; }
+.vw:nth-child(5n) { animation-delay: .2s; }
+@keyframes vw { 0%, 100% { height: 20%; } 50% { height: 100%; } }
+.voice-hint { margin-top: 44rpx; font-size: 28rpx; color: var(--ink-2); letter-spacing: .04em; }
+.voice-timer { margin-top: 20rpx; font-family: var(--serif); font-size: 30rpx; color: var(--ink-3); letter-spacing: .1em; }
+.voice-result { margin-top: 16rpx; }
+.vr-label { font-size: 22rpx; letter-spacing: .1em; margin-bottom: 16rpx; }
+.vr-text {
+  width: 100%; border: 1rpx solid var(--line); border-radius: 28rpx;
+  font-family: var(--serif); font-size: 32rpx; line-height: 1.9; color: var(--ink);
+  padding: 28rpx; min-height: 180rpx; background: #fff;
+}
+.switch-input { text-align: center; font-size: 26rpx; color: var(--ink-3); padding: 28rpx 0 8rpx; letter-spacing: .02em; }
+
+.q-foot { padding: 32rpx 52rpx 60rpx; }

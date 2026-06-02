@@ -1,0 +1,29 @@
+# ===== Python / 后端 =====
+server/.venv/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# 本地环境与密钥
+.env
+server/.env
+
+# 运行期产物（SQLite 数据库、用户上传、生成的占位音频——seed 会自动重建）
+*.db
+server/shengxu.db
+server/app/static/uploads/*
+!server/app/static/uploads/.gitkeep
+server/app/static/fallback_music/*.wav
+server/app/static/curves/*
+
+# ===== 微信开发者工具 =====
+# 私有配置（含本机路径/基础库等，因人而异，不入库）
+project.private.config.json
+miniprogram_npm/
+
+# ===== 杂项 =====
+.DS_Store
+Thumbs.db
+node_modules/
+*.log

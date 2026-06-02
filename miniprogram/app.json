@@ -1,0 +1,44 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/me/me",
+    "pages/act-home/act-home",
+    "pages/act-plaza/act-plaza",
+    "pages/act-mine/act-mine",
+    "pages/notif/notif",
+    "pages/about/about",
+    "pages/quiz/quiz",
+    "pages/gen/gen",
+    "pages/result/result",
+    "pages/share/share",
+    "pages/sim/sim",
+    "pages/sim-invite/sim-invite",
+    "pages/plaza-detail/plaza-detail",
+    "pages/code/code"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "声序实验室",
+    "backgroundColor": "#ffffff",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#9a9792",
+    "selectedColor": "#1c1b1a",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/home/home", "text": "实验室" },
+      { "pagePath": "pages/me/me", "text": "我的" },
+      { "pagePath": "pages/act-home/act-home", "text": "活动主页" },
+      { "pagePath": "pages/act-plaza/act-plaza", "text": "广场" },
+      { "pagePath": "pages/act-mine/act-mine", "text": "我的活动" }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

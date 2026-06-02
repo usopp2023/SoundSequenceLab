@@ -1,0 +1,17 @@
+<view class="share-wrap">
+  <view class="card">
+    <view class="c-kicker">ANERYA · 情绪音乐</view>
+    <view class="c-name">{{persona.name}}</view>
+    <view class="c-en">{{enUpper}}</view>
+    <view class="c-img">曲线预设图位</view>
+    <view class="c-line">「把说不出口的那点情绪，<text class="br"></text>留成一段只属于我的曲子。」</view>
+    <view class="c-qr">
+      <view class="qr"></view>
+      <view class="qt">扫码也测一次<text class="br"></text>看看我们有多像</view>
+    </view>
+  </view>
+
+  <view class="s-foot">
+    <button class="btn" open-type="share" hover-class="active-press" bindtap="onShareTap">分享到群</button>
+  </view>
+</view>

@@ -1,0 +1,27 @@
+<view class="tabpage-pad">
+  <view class="pad">
+    <view class="brand-from" bindtap="exitAct">本活动来自 <text class="b">声序实验室</text> ›</view>
+
+    <view class="intro-hero">
+      <view class="intro-kicker">A N E R Y A · 声序实验室</view>
+      <view class="intro-title display">情绪音乐</view>
+      <view class="intro-cover ph-box">
+        活动主视觉位<view class="placeholder-note">TODO: 设计师出图</view>
+      </view>
+    </view>
+
+    <view class="intro-body">
+      <view class="p">在阿那亚的海边，把那点说不出口的情绪，交给一段民乐替你说完。</view>
+      <view class="intro-h4">怎么玩</view>
+      <view class="step"><view class="sn">1</view><view class="st">回答三个简单的问题，约一分钟。</view></view>
+      <view class="step"><view class="sn">2</view><view class="st">我们读出你的情绪，为你谱一段只属于你的曲子。</view></view>
+      <view class="step"><view class="sn">3</view><view class="st">得到你的情绪音乐曲线与人格标签，可分享、可与朋友比对。</view></view>
+    </view>
+  </view>
+
+  <view class="intro-foot pad">
+    <view class="privacy-note faint">你的回答只用于生成你的音乐，不会公开给任何人。</view>
+    <button class="btn" hover-class="active-press" bindtap="startQuiz">开始</button>
+    <view class="codetip" bindtap="openCode">线下体验过？输入兑换码 →</view>
+  </view>
+</view>

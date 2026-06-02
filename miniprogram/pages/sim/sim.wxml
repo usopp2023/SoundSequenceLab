@@ -1,0 +1,28 @@
+<view class="sim-wrap">
+  <view class="pk-top">
+    <view class="pk-score">{{score}}<text class="pct">%</text></view>
+    <view class="pk-label">情绪曲线相似度</view>
+  </view>
+
+  <view class="pk-vs">
+    <view class="pk-person">
+      <view class="av"></view>
+      <view class="nm">你</view>
+      <view class="ty">{{you.name}}</view>
+    </view>
+    <view class="vs">VS</view>
+    <view class="pk-person">
+      <view class="av"></view>
+      <view class="nm">Ta</view>
+      <view class="ty">{{other.name}}</view>
+    </view>
+  </view>
+
+  <view class="pk-curve">两条曲线叠合图位</view>
+
+  <view class="pk-read"><view class="quote">{{reading}}</view></view>
+
+  <view class="pk-foot">
+    <button class="btn" open-type="share" hover-class="active-press">我也分享我的，邀更多人来比</button>
+  </view>
+</view>

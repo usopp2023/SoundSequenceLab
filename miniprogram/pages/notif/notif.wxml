@@ -1,0 +1,21 @@
+<scroll-view scroll-y class="page-scroll">
+  <view class="notif-list">
+    <view
+      wx:for="{{items}}"
+      wx:key="id"
+      class="notif-item {{item.read ? 'read' : ''}}"
+      hover-class="row-press"
+      data-type="{{item.type}}"
+      bindtap="onTap"
+    >
+      <view class="ni-dot"></view>
+      <view class="ni-body">
+        <view class="ni-title">{{item.title}}</view>
+        <view class="ni-text">{{item.text}}</view>
+        <view class="ni-time">{{item.time}}</view>
+      </view>
+      <view class="ni-go faint">›</view>
+    </view>
+  </view>
+  <view class="notif-empty-tip faint">这里展示活动通知、生成完成、社交匹配等消息（占位数据）</view>
+</scroll-view>

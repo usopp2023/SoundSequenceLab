@@ -1,0 +1,36 @@
+<view class="tabpage-pad">
+  <!-- 用户身份（微信） -->
+  <view class="me-head">
+    <view class="me-id">
+      <view class="av"></view>
+      <view>
+        <view class="nm">微信用户</view>
+        <view class="me-sub faint">声序实验室 · 已加入</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 我参与过的活动 -->
+  <view class="me-sec">
+    <view class="sec-h">我参与过的活动</view>
+    <view class="act-row" hover-class="row-press" bindtap="enterAct">
+      <view class="ar-thumb">〰️</view>
+      <view class="ar-meta">
+        <view class="ar-title">阿那亚 · 情绪音乐</view>
+        <view class="ar-sub">我的人格：{{latestPersona}}</view>
+      </view>
+      <view class="ar-go">›</view>
+    </view>
+  </view>
+
+  <!-- 设置 -->
+  <view class="me-sec">
+    <view class="sec-h">设置</view>
+    <view class="set-row" hover-class="row-press" data-flow="notif" bindtap="openFlow">
+      <text>消息通知</text><text class="faint">›</text>
+    </view>
+    <view class="set-row" hover-class="row-press" data-flow="about" bindtap="openFlow">
+      <text>关于声序实验室</text><text class="faint">›</text>
+    </view>
+  </view>
+</view>

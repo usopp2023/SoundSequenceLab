@@ -1,0 +1,37 @@
+<scroll-view scroll-y class="page-scroll">
+  <view class="pad">
+    <view class="r-head">
+      <view class="r-tag-name">{{work.name}}</view>
+      <view class="r-tag-en">{{enUpper}}</view>
+      <view class="r-source faint">{{work.by}}</view>
+    </view>
+
+    <view class="curve-img ph-box">
+      <view class="ph-ico">〰️</view>
+      <view class="ph-label">TA 的情绪音乐曲线（预设配图位）</view>
+    </view>
+
+    <view class="player {{playing ? 'playing' : ''}}" hover-class="player-press" bindtap="togglePlay">
+      <view class="play-btn">{{playing ? '❚❚' : '▶'}}</view>
+      <view class="play-meta">
+        <view class="t1">TA 生成的曲子</view>
+        <view class="wave">
+          <view class="bar" wx:for="{{waveBars}}" wx:key="index" style="height:{{item}}%"></view>
+        </view>
+        <view class="t2">{{playTimeLabel}}</view>
+      </view>
+    </view>
+
+    <view class="report">
+      <view class="r-h4">关于 TA</view>
+      <view class="r-p">{{work.desc}}</view>
+    </view>
+  </view>
+
+  <view class="r-foot pad">
+    <view class="btnrow">
+      <button class="btn ghost" hover-class="active-press" bindtap="toggleLike">{{work.liked ? '♥ 已喜欢' : '♡ 喜欢'}}</button>
+      <button class="btn" hover-class="active-press" bindtap="simWith">和 TA 比相似度</button>
+    </view>
+  </view>
+</scroll-view>

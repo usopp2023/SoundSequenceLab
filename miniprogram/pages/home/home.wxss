@@ -1,0 +1,36 @@
+.brand {
+  text-align: center;
+  padding: 60rpx 68rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.brand .ambient { width: 192rpx; height: 192rpx; margin-bottom: 48rpx; }
+.brand-name { font-size: 60rpx; letter-spacing: .14em; color: var(--ink); }
+.brand-en { font-size: 22rpx; letter-spacing: .34em; color: var(--ink-3); margin-top: 16rpx; }
+.brand-slogan { font-family: var(--serif); font-size: 32rpx; line-height: 1.9; color: var(--ink-2); margin-top: 40rpx; }
+.br { display: block; height: 0; }
+
+.acts { padding: 36rpx 52rpx 0; }
+.acts-h { font-size: 24rpx; color: var(--ink-3); letter-spacing: .16em; margin-bottom: 24rpx; }
+.acts-h.mt { margin-top: 52rpx; }
+
+.act-card {
+  display: flex; gap: 28rpx;
+  border: 1rpx solid var(--line); border-radius: var(--radius);
+  padding: 28rpx; box-shadow: var(--shadow);
+  transition: transform .15s;
+}
+.card-press { transform: scale(.99); }
+.act-card.disabled { box-shadow: none; opacity: .85; }
+.act-thumb {
+  width: 176rpx; height: 176rpx; flex: none; border-radius: 24rpx;
+  background: var(--fill); border: 3rpx dashed #cbc8c2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #a8a5a0; font-size: 48rpx;
+}
+.act-meta { flex: 1; min-width: 0; }
+.act-status { font-size: 22rpx; color: var(--ink-3); letter-spacing: .08em; }
+.act-title { font-family: var(--serif); font-size: 36rpx; font-weight: 600; color: var(--ink); margin: 10rpx 0 12rpx; }
+.act-desc { font-size: 24rpx; color: var(--ink-2); line-height: 1.7; }
+.act-go { font-size: 24rpx; color: var(--ink); margin-top: 18rpx; letter-spacing: .04em; }

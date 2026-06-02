@@ -1,0 +1,15 @@
+.notif-list { padding: 16rpx 44rpx 0; }
+.notif-item {
+  display: flex; gap: 24rpx; padding: 32rpx 0;
+  border-bottom: 1rpx solid var(--line-2); align-items: flex-start;
+}
+.row-press { opacity: .6; }
+.ni-dot { flex: none; width: 16rpx; height: 16rpx; border-radius: 50%; background: #1c1b1a; margin-top: 12rpx; }
+.notif-item.read .ni-dot { background: var(--line); }
+.ni-body { flex: 1; min-width: 0; }
+.ni-go { color: var(--ink-3); font-size: 36rpx; flex: none; align-self: center; }
+.ni-title { font-size: 28rpx; font-weight: 500; color: var(--ink); }
+.notif-item.read .ni-title { font-weight: 400; color: var(--ink-2); }
+.ni-text { font-size: 26rpx; color: var(--ink-2); line-height: 1.7; margin-top: 10rpx; }
+.ni-time { font-size: 22rpx; color: var(--ink-3); margin-top: 14rpx; }
+.notif-empty-tip { text-align: center; font-size: 22rpx; padding: 48rpx; letter-spacing: .04em; }

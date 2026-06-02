@@ -1,0 +1,23 @@
+<view class="plaza-wrap">
+  <!-- 海滩场景：按时段切换背景 t-dawn / t-day / t-dusk / t-night -->
+  <view class="scene t-{{tod}}"></view>
+
+  <!-- 海面光球（漂浮的大家的情绪音乐）-->
+  <view class="sea" id="sea">
+    <view
+      wx:for="{{bubbles}}"
+      wx:key="id"
+      class="bubble"
+      style="{{item.style}}"
+      hover-class="bubble-press"
+      data-id="{{item.id}}"
+      bindtap="openDetail"
+    >
+      <view class="b-wave">〰️</view>
+      <view class="b-name">{{item.name}}</view>
+      <view class="b-like {{item.liked ? 'on' : ''}}">{{item.liked ? '♥' : '♡'}} {{item.likes}}</view>
+    </view>
+  </view>
+
+  <view class="plaza-refresh" hover-class="refresh-press" bindtap="refresh">换一批</view>
+</view>

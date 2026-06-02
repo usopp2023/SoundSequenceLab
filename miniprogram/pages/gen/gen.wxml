@@ -1,0 +1,10 @@
+<view class="flow gen">
+  <view class="topbar" style="padding-top:{{statusBar}}px">
+    <view class="gen-exit" hover-class="exit-press" bindtap="cancelGen">✕ 退出</view>
+  </view>
+  <view class="gen-body">
+    <view class="gen-orb"></view>
+    <view class="gen-text">{{genText}}</view>
+    <view class="gen-sub">为你谱一段曲子，请稍候</view>
+  </view>
+</view>

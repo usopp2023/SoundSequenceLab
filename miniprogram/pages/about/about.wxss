@@ -1,0 +1,16 @@
+.about-hero { text-align: center; padding-top: 28rpx; display: flex; flex-direction: column; align-items: center; }
+.about-ambient { width: 168rpx; height: 168rpx; margin: 16rpx 0 44rpx; }
+.about-name { font-size: 52rpx; letter-spacing: .14em; color: var(--ink); }
+.about-en { font-size: 22rpx; letter-spacing: .34em; color: var(--ink-3); margin-top: 16rpx; }
+
+.about-body { padding: 60rpx 4rpx 0; }
+.about-body .p { font-family: var(--serif); font-size: 30rpx; line-height: 2; color: var(--ink); margin-bottom: 36rpx; }
+.about-h4 { font-size: 26rpx; color: var(--ink-3); letter-spacing: .18em; margin: 52rpx 0 20rpx; }
+.about-row {
+  display: flex; justify-content: space-between;
+  padding: 26rpx 8rpx; border-bottom: 1rpx solid var(--line-2);
+  font-size: 28rpx; color: var(--ink);
+}
+.row-press { opacity: .6; }
+.about-foot { text-align: center; font-size: 22rpx; padding: 80rpx 0 40rpx; letter-spacing: .04em; }
+.about-foot .vmt { margin-top: 12rpx; }

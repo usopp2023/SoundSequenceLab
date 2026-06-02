@@ -1,0 +1,93 @@
+<view class="tabpage-pad">
+  <!-- 活动内身份 -->
+  <view class="me-head">
+    <view class="me-id">
+      <view class="av"></view>
+      <view>
+        <view class="nm">{{latestPersona}}</view>
+        <view class="badge">{{badge}}</view>
+      </view>
+    </view>
+    <view class="me-sub faint">这是你在阿那亚 · 情绪音乐 里的身份</view>
+  </view>
+
+  <!-- 我的情绪档案 -->
+  <view class="me-sec">
+    <view class="sec-h">我的情绪档案</view>
+    <scroll-view scroll-x class="archive" enhanced show-scrollbar="{{false}}">
+      <view
+        wx:for="{{archive}}"
+        wx:key="resultId"
+        class="arch-card"
+        hover-class="row-press"
+        data-id="{{item.resultId}}"
+        bindtap="openArchive"
+      >
+        <view class="ai">〰️</view>
+        <view class="an">{{item.name}}</view>
+        <view class="ad">{{item.when}}</view>
+      </view>
+      <view class="arch-card" hover-class="row-press" bindtap="startQuiz">
+        <view class="ai">＋</view>
+        <view class="an faint">再测一次</view>
+        <view class="ad"> </view>
+      </view>
+    </scroll-view>
+    <view class="arch-note faint">每次都会生成一条新的，旧的记录会一直保留。</view>
+  </view>
+
+  <!-- 我收藏的 -->
+  <view class="me-sec">
+    <view class="sec-h">我收藏的</view>
+    <scroll-view wx:if="{{collected.length}}" scroll-x class="archive" enhanced show-scrollbar="{{false}}">
+      <view
+        wx:for="{{collected}}"
+        wx:key="plazaId"
+        class="arch-card"
+        hover-class="row-press"
+        data-id="{{item.plazaId}}"
+        bindtap="openCollected"
+      >
+        <view class="ai">〰️</view>
+        <view class="an">{{item.name}}</view>
+        <view class="ad">已收藏</view>
+      </view>
+    </scroll-view>
+    <view wx:else class="arch-empty faint">在广场里点 ♥ 喜欢，就会收藏到这里。</view>
+  </view>
+
+  <!-- 我的权益 -->
+  <view class="me-sec">
+    <view class="sec-h">我的权益</view>
+    <view class="perk {{perkOpen[0] ? 'open' : ''}}" data-i="0" bindtap="togglePerk">
+      <view class="pi"></view>
+      <view class="perk-main">
+        <view class="pt1">基础优惠</view>
+        <view class="pt2">线上完成体验即可获得</view>
+        <view class="perk-detail">
+          <view class="pd-row"><text>合作商家 9 折</text><text class="pd-code">码 8842</text></view>
+          <view class="pd-tip faint">向商家出示此页即可使用（核销码占位）</view>
+        </view>
+      </view>
+      <view class="lock">已解锁</view>
+    </view>
+
+    <view class="perk {{perkOpen[1] ? 'open' : ''}}" data-i="1" bindtap="togglePerk">
+      <view class="pi"></view>
+      <view class="perk-main">
+        <view class="pt1">线下完整体验权益</view>
+        <view class="pt2">{{offlineUnlocked ? '已通过兑换码解锁' : '现场体验 + 兑换码解锁'}}</view>
+        <view class="perk-detail">
+          <view class="pd-row">
+            <text>合作商家 5 折 + 限定纪念卡</text>
+            <text class="pd-code">{{offlineUnlocked ? '码 5530' : '未解锁'}}</text>
+          </view>
+          <view class="pd-tip faint">在阿那亚现场体验，或输入兑换码后解锁。</view>
+        </view>
+      </view>
+      <view class="lock">{{offlineUnlocked ? '已解锁' : '未解锁'}}</view>
+    </view>
+  </view>
+
+  <view class="me-codeentry" bindtap="openCode">输入兑换码 · 领取线下完整权益</view>
+</view>

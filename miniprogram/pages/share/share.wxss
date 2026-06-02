@@ -1,0 +1,25 @@
+.share-wrap {
+  min-height: 100vh; background: #f4f2ee;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  padding: 40rpx 0 200rpx;
+}
+.card {
+  width: 600rpx; background: #fff; border-radius: 44rpx;
+  box-shadow: 0 40rpx 100rpx rgba(0,0,0,.12);
+  padding: 60rpx 52rpx 52rpx; text-align: center;
+}
+.c-kicker { font-size: 20rpx; letter-spacing: .28em; color: var(--ink-3); text-transform: uppercase; }
+.c-name { font-family: var(--serif); font-size: 50rpx; font-weight: 600; margin: 28rpx 0 8rpx; }
+.c-en { font-size: 20rpx; letter-spacing: .22em; color: var(--ink-3); text-transform: uppercase; }
+.c-img {
+  margin: 44rpx 0; width: 100%; aspect-ratio: 4 / 3; border-radius: 28rpx;
+  background: var(--fill); border: 3rpx dashed #cbc8c2;
+  display: flex; align-items: center; justify-content: center; color: #a8a5a0; font-size: 22rpx; letter-spacing: .1em;
+}
+.c-line { font-family: var(--serif); font-size: 28rpx; color: var(--ink-2); line-height: 1.8; }
+.br { display: block; height: 0; }
+.c-qr { margin-top: 40rpx; display: flex; align-items: center; gap: 20rpx; justify-content: center; }
+.c-qr .qr { width: 84rpx; height: 84rpx; border-radius: 16rpx; background: var(--fill); border: 1rpx solid var(--line); }
+.c-qr .qt { text-align: left; font-size: 18rpx; color: var(--ink-3); line-height: 1.5; }
+
+.s-foot { position: fixed; left: 0; right: 0; bottom: 0; padding: 0 52rpx 68rpx; }

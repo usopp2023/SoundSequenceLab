@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>情绪音乐 · 小程序原型</title>
+<style>
+  /* =========================================================
+     App / 小程序形态原型。纯白底 + 中性灰阶占位，等设计师上色。
+     两类页面：
+       · Tab 页（底部 TabBar 常驻）：测一测、我的
+       · 流程页（全屏沉浸、无底栏，仅顶部返回）：答题/生成/结果/分享/PK/兑换码
+     可替换视觉位标了 TODO。
+     ========================================================= */
+  :root{
+    --bg:#ffffff;
+    --ink:#1c1b1a; --ink-2:#6b6864; --ink-3:#9a9792;
+    --line:#dcdad5; --line-2:#eeece8; --fill:#f0eeea;
+    --tabh:60px;        /* 底栏高度 */
+    --navh:50px;        /* 顶栏高度 */
+    --maxw:430px;
+    --serif:"Songti SC","Noto Serif CJK SC","Source Han Serif SC",serif;
+    --sans:"PingFang SC","Noto Sans CJK SC","Source Han Sans SC",sans-serif;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.05);
+    --radius:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:#dcdad6;font-family:var(--sans);color:var(--ink);}
+  body{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:24px 0;
+    background:radial-gradient(120% 120% at 50% 0%, #e9e7e3 0%, #d2cfca 100%);}
+
+  /* 手机外壳：边框 + 圆角 + 刘海 + Home Indicator */
+  .device{
+    position:relative;width:var(--maxw);max-width:calc(100vw - 24px);
+    aspect-ratio:9/19.5;max-height:calc(100vh - 48px);
+    background:#111014;border-radius:48px;padding:12px;
+    box-shadow:0 0 0 2px #2a2a2e, 0 30px 60px rgba(0,0,0,.32), 0 8px 20px rgba(0,0,0,.2);
+  }
+  /* 侧键装饰 */
+  .device::before{content:"";position:absolute;left:-3px;top:130px;width:3px;height:34px;border-radius:3px;background:#26262a;}
+  .device::after{content:"";position:absolute;left:-3px;top:182px;width:3px;height:54px;border-radius:3px;background:#26262a;}
+  /* 屏幕 */
+  .phone{position:relative;width:100%;height:100%;background:var(--bg);border-radius:38px;
+    overflow:hidden;display:flex;flex-direction:column;}
+  /* 刘海 */
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:50;
+    width:140px;height:26px;background:#111014;border-bottom-left-radius:16px;border-bottom-right-radius:16px;pointer-events:none;}
+  /* Home Indicator */
+  .home-ind{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);z-index:50;
+    width:120px;height:4px;border-radius:3px;background:rgba(0,0,0,.22);pointer-events:none;}
+  /* 顶部安全区，给刘海让位 */
+  .topbar{height:var(--navh);flex:none;display:flex;align-items:center;padding:0 16px;position:relative;background:var(--bg);padding-top:14px;}
+  .topbar .back{width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+    font-size:22px;color:var(--ink-2);cursor:pointer;border-radius:50%;}
+  .topbar .back:active{background:var(--line-2);}
+  .topbar .title{position:absolute;left:0;right:0;text-align:center;font-size:16px;font-weight:500;color:var(--ink);pointer-events:none;letter-spacing:.04em;}
+  .topbar.flow .title{font-size:15px;color:var(--ink-2);font-weight:400;}
+
+  /* 内容容器 */
+  .body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+  .pad{padding:0 26px;}
+
+  /* 底部 TabBar */
+  .tabbar{height:var(--tabh);flex:none;display:flex;border-top:1px solid var(--line);background:var(--bg);
+    padding-bottom:10px;}
+  .tabbar .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    cursor:pointer;color:var(--ink-3);}
+  .tabbar .tab.on{color:var(--ink);}
+  .tabbar .tab .ic{width:22px;height:22px;display:flex;align-items:center;justify-content:center;}
+  .tabbar .tab .ic svg{width:22px;height:22px;}
+  .tabbar .tab .lb{font-size:11px;letter-spacing:.04em;}
+
+  /* 页面切换 */
+  .screen{display:none;flex-direction:column;height:100%;}
+  .screen.active{display:flex;}
+
+  /* 文字/按钮通用 */
+  .display{font-family:var(--serif);font-weight:600;}
+  .muted{color:var(--ink-2);} .faint{color:var(--ink-3);} .center{text-align:center;}
+  .btn{appearance:none;border:none;cursor:pointer;font-family:var(--sans);width:100%;padding:16px;
+    border-radius:999px;font-size:16px;font-weight:500;background-color:#1c1b1a;color:#fff;
+    letter-spacing:.06em;transition:transform .15s,opacity .15s;}
+  .btn:active{transform:scale(.985);opacity:.9;}
+  .btn.ghost{background-color:#fff;color:#1c1b1a;border:1px solid var(--line);}
+  .btnrow{display:flex;gap:12px;} .btnrow .btn{flex:1;}
+  .placeholder-note{font-size:10px;color:#c8c5c0;letter-spacing:.08em;}
+
+  /* ===== Tab1：测一测（入口首页，带底栏）===== */
+  #home .body{display:flex;flex-direction:column;}
+  #home .hero{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 34px;}
+  .ambient{width:120px;height:120px;border-radius:50%;border:1px solid var(--line);margin-bottom:36px;position:relative;}
+  .ambient::after{content:"";position:absolute;inset:18px;border-radius:50%;border:1px solid var(--line-2);}
+  #home .kicker{font-size:13px;color:var(--ink-3);letter-spacing:.32em;margin-bottom:26px;}
+  #home .lead{font-size:25px;line-height:1.7;color:var(--ink);}
+  #home .sub{margin-top:24px;font-size:14px;color:var(--ink-2);line-height:1.9;}
+  #home .home-foot{padding:0 26px 26px;}
+  #home .codetip{text-align:center;font-size:12px;color:var(--ink-3);margin-top:16px;letter-spacing:.04em;cursor:pointer;}
+
+  /* ===== 答题（流程页）===== */
+  .progress{display:flex;gap:6px;padding:6px 26px 0;}
+  .progress .seg{flex:1;height:3px;border-radius:2px;background:var(--line);}
+  .progress .seg.on{background:#1c1b1a;}
+  .q-wrap{flex:1;display:flex;flex-direction:column;padding:34px 26px 26px;}
+  .q-index{font-size:12px;color:var(--ink-3);letter-spacing:.22em;margin-bottom:20px;}
+  .q-text{font-family:var(--serif);font-size:23px;line-height:1.7;color:var(--ink);font-weight:600;}
+  .q-hint{margin-top:14px;font-size:13px;color:var(--ink-2);line-height:1.8;}
+  .q-input{margin-top:24px;flex:1;width:100%;border:none;outline:none;resize:none;font-family:var(--serif);
+    font-size:18px;line-height:1.9;color:var(--ink);background:transparent;border-bottom:1px solid var(--line);
+    padding-bottom:12px;min-height:110px;}
+  .q-input::placeholder{color:#cfccc7;font-family:var(--sans);font-size:15px;}
+  .q-foot{padding:16px 26px 30px;}
+  /* 语音输入 */
+  .voice-area{flex:1;display:flex;flex-direction:column;}
+  .voice-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0;}
+  .mic-btn{width:84px;height:84px;border-radius:50%;background-color:#1c1b1a;color:#fff;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:transform .15s;}
+  .mic-btn svg{width:34px;height:34px;}
+  .mic-btn:active{transform:scale(.94);}
+  .mic-btn.rec{background-color:#b5613f;animation:micpulse 1.4s ease-in-out infinite;}
+  @keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(181,97,63,.4);}50%{box-shadow:0 0 0 16px rgba(181,97,63,0);}}
+  .voice-waves{display:none;align-items:center;gap:3px;height:30px;margin-top:22px;}
+  .voice-waves.on{display:flex;}
+  .voice-waves i{width:3px;background:var(--ink-3);border-radius:3px;height:30%;animation:vw .8s ease-in-out infinite;}
+  .voice-waves i:nth-child(2n){animation-delay:.15s;}.voice-waves i:nth-child(3n){animation-delay:.3s;}
+  .voice-waves i:nth-child(4n){animation-delay:.45s;}.voice-waves i:nth-child(5n){animation-delay:.2s;}
+  @keyframes vw{0%,100%{height:20%;}50%{height:100%;}}
+  .voice-hint{margin-top:22px;font-size:14px;color:var(--ink-2);letter-spacing:.04em;}
+  .voice-timer{margin-top:10px;font-family:var(--serif);font-size:15px;color:var(--ink-3);letter-spacing:.1em;}
+  .voice-result{margin:8px 0 0;}
+  .vr-label{font-size:11px;letter-spacing:.1em;margin-bottom:8px;}
+  .vr-text{width:100%;border:1px solid var(--line);border-radius:14px;outline:none;resize:none;
+    font-family:var(--serif);font-size:16px;line-height:1.9;color:var(--ink);padding:14px;min-height:90px;background:#fff;}
+  .switch-input{text-align:center;font-size:13px;color:var(--ink-3);padding:14px 0 4px;cursor:pointer;letter-spacing:.02em;}
+  .type-area{flex:1;display:flex;flex-direction:column;}
+
+  /* ===== 生成（流程页）===== */
+  #gen .body{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:0 40px;}
+  .gen-orb{width:90px;height:90px;border-radius:50%;border:1.5px solid #1c1b1a;position:relative;
+    margin-bottom:42px;animation:breathe 2.6s ease-in-out infinite;}
+  .gen-orb::before,.gen-orb::after{content:"";position:absolute;inset:0;border-radius:50%;border:1px solid var(--line);}
+  .gen-orb::before{animation:ripple 2.6s ease-out infinite;}
+  .gen-orb::after{animation:ripple 2.6s ease-out infinite 1.3s;}
+  @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(.9);}}
+  @keyframes ripple{0%{transform:scale(1);opacity:.6;}100%{transform:scale(1.9);opacity:0;}}
+  .gen-text{font-family:var(--serif);font-size:18px;color:var(--ink);line-height:1.7;transition:opacity .5s;}
+  .gen-sub{margin-top:14px;font-size:12px;color:var(--ink-3);letter-spacing:.08em;}
+
+  /* ===== 结果（流程页）===== */
+  .r-head{text-align:center;margin-top:6px;}
+  .r-tag-name{font-family:var(--serif);font-size:30px;font-weight:600;color:var(--ink);letter-spacing:.04em;}
+  .r-tag-en{font-size:12px;color:var(--ink-3);letter-spacing:.26em;margin-top:8px;text-transform:uppercase;}
+  .curve-img{margin:26px 0;width:100%;aspect-ratio:1/1;border-radius:var(--radius);background:var(--fill);
+    border:1.5px dashed #cbc8c2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#a8a5a0;}
+  .curve-img .ph-ico{font-size:30px;} .curve-img .ph-label{font-size:12px;letter-spacing:.1em;}
+  .player{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);}
+  .play-btn{width:46px;height:46px;border-radius:50%;background-color:#1c1b1a;color:#fff;border:none;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;font-size:16px;}
+  .play-meta{flex:1;} .play-meta .t1{font-size:14px;color:var(--ink);} .play-meta .t2{font-size:11px;color:var(--ink-3);margin-top:3px;}
+  .wave{display:flex;align-items:center;gap:2px;height:24px;margin-top:8px;}
+  .wave i{display:block;width:2px;background:var(--line);border-radius:2px;height:30%;}
+  .player.playing .wave i{animation:eq .9s ease-in-out infinite;background:var(--ink-3);}
+  .wave i:nth-child(2n){animation-delay:.15s;}.wave i:nth-child(3n){animation-delay:.3s;}
+  .wave i:nth-child(4n){animation-delay:.45s;}.wave i:nth-child(5n){animation-delay:.2s;}
+  @keyframes eq{0%,100%{height:25%;}50%{height:90%;}}
+  .report{margin-top:30px;} .report h4{font-size:13px;color:var(--ink-3);letter-spacing:.18em;margin:0 0 14px;font-weight:500;}
+  .report p{font-family:var(--serif);font-size:16px;line-height:2;color:var(--ink);margin:0 0 18px;}
+  .dim{margin-bottom:18px;} .dim .dlabel{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-bottom:7px;}
+  .dim .dlabel .active{color:var(--ink);font-weight:500;}
+  .dbar{height:4px;border-radius:3px;background:var(--line);position:relative;}
+  .dbar span{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;background:#1c1b1a;transform:translate(-50%,-50%);box-shadow:0 0 0 4px #fff;}
+  .saved-tip{text-align:center;font-size:12px;color:var(--ink-3);margin:4px 0 0;letter-spacing:.04em;}
+  .r-foot{padding:8px 26px 30px;}
+
+  /* ===== 分享卡片（流程页）===== */
+  #share .body{display:flex;flex-direction:column;justify-content:center;align-items:center;background:#f4f2ee;}
+  .card{width:300px;background:#fff;border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.12);padding:30px 26px 26px;text-align:center;}
+  .card .c-kicker{font-size:10px;letter-spacing:.28em;color:var(--ink-3);text-transform:uppercase;}
+  .card .c-name{font-family:var(--serif);font-size:25px;font-weight:600;margin:14px 0 4px;}
+  .card .c-en{font-size:10px;letter-spacing:.22em;color:var(--ink-3);text-transform:uppercase;}
+  .card .c-img{margin:22px 0;width:100%;aspect-ratio:4/3;border-radius:14px;background:var(--fill);border:1.5px dashed #cbc8c2;display:flex;align-items:center;justify-content:center;color:#a8a5a0;font-size:11px;letter-spacing:.1em;}
+  .card .c-line{font-family:var(--serif);font-size:14px;color:var(--ink-2);line-height:1.8;}
+  .card .c-qr{margin-top:20px;display:flex;align-items:center;gap:10px;justify-content:center;}
+  .card .c-qr .qr{width:42px;height:42px;border-radius:8px;background:var(--fill);border:1px solid var(--line);}
+  .card .c-qr .qt{text-align:left;font-size:9px;color:var(--ink-3);line-height:1.5;}
+  #share .s-foot{position:absolute;bottom:0;left:0;right:0;padding:0 26px 34px;}
+
+  /* ===== PK（流程页）===== */
+  .pk-top{padding:26px 26px 10px;text-align:center;}
+  .pk-score{font-family:var(--serif);font-size:64px;font-weight:600;line-height:1;color:var(--ink);}
+  .pk-score .pct{font-size:24px;} .pk-label{font-size:13px;color:var(--ink-2);letter-spacing:.1em;margin-top:10px;}
+  .pk-vs{display:flex;align-items:center;gap:14px;padding:22px 26px;}
+  .pk-person{flex:1;text-align:center;} .pk-person .av{width:54px;height:54px;border-radius:50%;background:var(--fill);border:1px solid var(--line);margin:0 auto 10px;}
+  .pk-person .nm{font-family:var(--serif);font-size:15px;color:var(--ink);} .pk-person .ty{font-size:11px;color:var(--ink-3);margin-top:3px;}
+  .pk-vs .vs{font-family:var(--serif);font-size:13px;color:var(--ink-3);}
+  .pk-curve{margin:0 26px;aspect-ratio:16/9;border-radius:var(--radius);background:var(--fill);border:1.5px dashed #cbc8c2;display:flex;align-items:center;justify-content:center;color:#a8a5a0;font-size:11px;letter-spacing:.1em;}
+  .pk-read{padding:22px 26px;} .pk-read .quote{font-family:var(--serif);font-size:16px;line-height:2;color:var(--ink);}
+  .pk-foot{padding:8px 26px 30px;}
+
+  /* ===== 兑换码（流程页）===== */
+  .code-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 26px;}
+  .code-title{font-family:var(--serif);font-size:22px;font-weight:600;text-align:center;}
+  .code-sub{text-align:center;font-size:13px;color:var(--ink-2);margin-top:12px;line-height:1.8;}
+  .code-input{margin-top:34px;width:100%;text-align:center;font-family:var(--serif);font-size:24px;letter-spacing:.3em;padding:16px;border:1px solid var(--line);border-radius:14px;outline:none;}
+  .code-input:focus{border-color:var(--ink);}
+
+  /* ===== Tab2：我的（带底栏）===== */
+  .me-head{padding:24px 26px 16px;}
+  .me-id{display:flex;align-items:center;gap:14px;}
+  .me-id .av{width:56px;height:56px;border-radius:50%;background:var(--fill);border:1px solid var(--line);flex:none;}
+  .me-id .nm{font-family:var(--serif);font-size:19px;font-weight:600;}
+  .me-id .badge{display:inline-block;margin-top:6px;font-size:11px;color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:3px 10px;letter-spacing:.06em;}
+  .me-sub{font-size:12px;margin-top:6px;}
+  .act-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;cursor:pointer;box-shadow:var(--shadow);}
+  .act-row:active{transform:scale(.99);}
+  .ar-thumb{width:48px;height:48px;flex:none;border-radius:10px;background:var(--fill);border:1.5px dashed #cbc8c2;display:flex;align-items:center;justify-content:center;color:#a8a5a0;font-size:18px;}
+  .ar-meta{flex:1;min-width:0;} .ar-title{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink);}
+  .ar-sub{font-size:12px;color:var(--ink-3);margin-top:4px;}
+  .ar-go{color:var(--ink-3);font-size:20px;flex:none;}
+  .set-row{display:flex;justify-content:space-between;align-items:center;padding:15px 4px;border-bottom:1px solid var(--line-2);font-size:14px;color:var(--ink);cursor:pointer;}
+
+  /* ===== 消息通知 ===== */
+  .notif-list{padding:8px 22px 0;}
+  .notif-item{display:flex;gap:12px;padding:16px 0;border-bottom:1px solid var(--line-2);cursor:pointer;align-items:flex-start;}
+  .notif-item .ni-body{flex:1;min-width:0;}
+  .notif-item .ni-go{color:var(--ink-3);font-size:18px;flex:none;align-self:center;}
+  .notif-item .ni-dot{flex:none;width:8px;height:8px;border-radius:50%;background:#1c1b1a;margin-top:6px;}
+  .notif-item.read .ni-dot{background:var(--line);}
+  .ni-title{font-size:14px;font-weight:500;color:var(--ink);}
+  .notif-item.read .ni-title{font-weight:400;color:var(--ink-2);}
+  .ni-text{font-size:13px;color:var(--ink-2);line-height:1.7;margin-top:5px;}
+  .ni-time{font-size:11px;color:var(--ink-3);margin-top:7px;}
+  .notif-empty-tip{text-align:center;font-size:11px;padding:24px;letter-spacing:.04em;}
+
+  /* ===== 关于 ===== */
+  .about-hero{text-align:center;padding-top:14px;}
+  .about-hero .ambient{width:84px;height:84px;}
+  .about-name{font-size:26px;letter-spacing:.14em;color:var(--ink);}
+  .about-en{font-size:11px;letter-spacing:.34em;color:var(--ink-3);margin-top:8px;}
+  .about-body{padding:30px 2px 0;}
+  .about-body p{font-family:var(--serif);font-size:15px;line-height:2;color:var(--ink);margin:0 0 18px;}
+  .about-body h4{font-size:13px;color:var(--ink-3);letter-spacing:.18em;margin:26px 0 10px;font-weight:500;}
+  .about-row{display:flex;justify-content:space-between;padding:13px 4px;border-bottom:1px solid var(--line-2);font-size:14px;color:var(--ink);}
+  .about-foot{text-align:center;font-size:11px;padding:40px 0 20px;letter-spacing:.04em;}
+  .me-sec{padding:8px 26px;} .me-sec h4{font-size:12px;color:var(--ink-3);letter-spacing:.16em;margin:18px 0 12px;font-weight:500;display:flex;justify-content:space-between;}
+  .me-sec h4 .more{color:var(--ink-3);font-weight:400;cursor:pointer;}
+  .archive{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;}
+  .arch-card{flex:none;width:120px;cursor:pointer;}
+  .arch-card .ai{width:120px;height:120px;border-radius:14px;background:var(--fill);border:1.5px dashed #cbc8c2;display:flex;align-items:center;justify-content:center;color:#a8a5a0;font-size:24px;}
+  .arch-card .an{font-family:var(--serif);font-size:13px;margin-top:8px;} .arch-card .ad{font-size:11px;color:var(--ink-3);margin-top:2px;}
+  .perk{display:flex;align-items:flex-start;gap:14px;padding:16px;border:1px solid var(--line);border-radius:14px;margin-bottom:12px;cursor:pointer;}
+  .perk .pi{width:40px;height:40px;border-radius:10px;background:var(--fill);border:1px solid var(--line);flex:none;}
+  .perk-main{flex:1;min-width:0;}
+  .perk .pt1{font-size:14px;color:var(--ink);} .perk .pt2{font-size:11px;color:var(--ink-3);margin-top:3px;}
+  .perk .lock{margin-left:8px;font-size:11px;color:var(--ink-3);flex:none;padding-top:2px;}
+  .perk-detail{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-2);}
+  .perk.open .perk-detail{display:block;}
+  .pd-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--ink);}
+  .pd-code{font-family:var(--serif);font-size:13px;color:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:2px 8px;letter-spacing:.1em;}
+  .pd-tip{font-size:11px;margin-top:8px;line-height:1.6;}
+  .arch-note{font-size:11px;margin-top:10px;letter-spacing:.02em;}
+  .brand-from{text-align:center;font-size:12px;color:var(--ink-3);padding:6px 0 14px;cursor:pointer;letter-spacing:.02em;}
+  .brand-from b{color:var(--ink-2);font-weight:500;}
+  .gen-exit{font-size:13px;color:var(--ink-3);cursor:pointer;padding:6px 4px;letter-spacing:.04em;}
+  .privacy-note{text-align:center;font-size:12px;margin:0 0 12px;letter-spacing:.02em;}
+  /* 广场 · 扁平插画海滩（实色色块 + 利落曲线 + 颗粒质感，无 blur/渐变雾化）*/
+  #plaza{position:relative;}
+  #plaza .topbar{position:absolute;top:0;left:0;right:0;background:transparent;z-index:6;}
+  #plaza .topbar .title{color:#3a4a52;}
+  .plaza-refresh{position:absolute;left:50%;bottom:46px;transform:translateX(-50%);z-index:5;
+    font-size:13px;color:#7a6a52;cursor:pointer;letter-spacing:.08em;
+    background:rgba(255,255,255,.5);border:1px solid rgba(122,106,82,.25);border-radius:999px;padding:8px 22px;}
+  .plaza-refresh:active{transform:translateX(-50%) scale(.97);}
+  #plaza .body{position:relative;overflow:hidden;padding:0;}
+
+  /* 场景：用一张全屏 SVG 画扁平插画，实色填充、利落曲线 */
+  .scene{position:absolute;inset:0;z-index:0;}
+  .scene svg.art{position:absolute;inset:0;width:100%;height:100%;}
+  /* 浪/沙滩泡沫描边：干净利落的白线 */
+  .art .wf{fill:none;stroke:#fbfaf6;stroke-width:3;stroke-linecap:round;}
+  .art .dots circle{fill:#fbfaf6;}
+  /* —— 扁平实色色板（低饱和，统一到 App 的燕麦/赤陶中性调）—— */
+  .art .wf{stroke:#f4efe6;} .art .dots circle{fill:#f4efe6;}   /* 泡沫统一用燕麦白 */
+  /* 白天：雾青海 + 燕麦沙 */
+  .scene.day #skyRect{fill:#dfe7e6;} .scene.day #seaRect{fill:#7f9b9b;}
+  .scene.day #wv1{fill:#aabbb8;} .scene.day #wv2{fill:#98aeac;} .scene.day #wv3{fill:#88a09f;} .scene.day #wv4{fill:#7a9492;}
+  .scene.day #beachShape{fill:#e7dcc6;} .scene.day #sunCore{fill:#e9d9b8;} .scene.day #sunHalo1{fill:#efe4cd;} .scene.day #sunHalo2{fill:#f4ecde;}
+  /* 清晨：更浅的雾青 */
+  .scene.dawn #skyRect{fill:#e4e6e0;} .scene.dawn #seaRect{fill:#92a6a2;}
+  .scene.dawn #wv1{fill:#bac8c2;} .scene.dawn #wv2{fill:#a9b9b4;} .scene.dawn #wv3{fill:#98aaa5;} .scene.dawn #wv4{fill:#8a9d98;}
+  .scene.dawn #beachShape{fill:#eae0cb;} .scene.dawn #sunCore{fill:#f0e2c8;} .scene.dawn #sunHalo1{fill:#f4e9d4;} .scene.dawn #sunHalo2{fill:#f8f0e2;}
+  /* 黄昏：赤陶暖调天 + 灰紫海（呼应品牌赤陶）*/
+  .scene.dusk #skyRect{fill:#e0b196;} .scene.dusk #seaRect{fill:#8a7f86;}
+  .scene.dusk #wv1{fill:#b59a96;} .scene.dusk #wv2{fill:#a68d8c;} .scene.dusk #wv3{fill:#977f84;} .scene.dusk #wv4{fill:#88727b;}
+  .scene.dusk #beachShape{fill:#d8bfa1;} .scene.dusk #sunCore{fill:#e6b48c;} .scene.dusk #sunHalo1{fill:#ecc4a2;} .scene.dusk #sunHalo2{fill:#f1d3b8;}
+  .scene.dusk .art .wf{stroke:#f6ece0;} .scene.dusk .art .dots circle{fill:#f6ece0;}
+  /* 深夜：墨青（去掉蓝，偏中性冷灰）*/
+  .scene.night #skyRect{fill:#2a3338;} .scene.night #seaRect{fill:#313d40;}
+  .scene.night #wv1{fill:#46555a;} .scene.night #wv2{fill:#3f4d51;} .scene.night #wv3{fill:#384549;} .scene.night #wv4{fill:#313d40;}
+  .scene.night #beachShape{fill:#3a3a36;} .scene.night #sunCore{fill:#e3dccd;} .scene.night #sunHalo1{fill:#cfc7b6;} .scene.night #sunHalo2{fill:#bbb3a2;}
+  .scene.night .art .wf{stroke:#cdc7ba;} .scene.night .art .dots circle{fill:#cdc7ba;}
+  /* 浪/泡沫的极缓起伏 */
+  .art .wv,.art .wf{animation:swell 9s ease-in-out infinite;}
+  .art #wv2,.art #wf2{animation-delay:-2.2s;} .art #wv3,.art #wf3{animation-delay:-4.4s;} .art #wv4,.art #wf4{animation-delay:-6.6s;}
+  @keyframes swell{0%,100%{transform:translateY(0);}50%{transform:translateY(3px);}}
+  /* 颗粒质感：极淡 noise 叠在最上层，营造插画/印刷感 */
+
+
+  .plaza-intro{position:absolute;left:0;right:0;top:var(--navh);z-index:5;font-size:12px;line-height:1.7;
+    padding:8px 26px 4px;letter-spacing:.02em;color:#46555c;}
+  .plaza-intro b{color:#2f3d44;font-weight:600;}
+
+  /* 光球：扁平半透明圆 + 干净细描边（浮在海面）*/
+  .sea{position:absolute;left:0;right:0;top:39%;height:35%;z-index:3;}
+  .bubble{position:absolute;border-radius:50%;cursor:pointer;
+    background:rgba(255,255,255,.26);border:1.5px solid rgba(255,255,255,.85);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:5px;
+    animation:floatA var(--dur,7s) ease-in-out infinite var(--delay,0s);}
+  .bubble::after{content:"";position:absolute;top:18%;left:24%;width:18%;height:18%;border-radius:50%;background:rgba(255,255,255,.9);}
+  .bubble:active{transform:scale(.95);}
+  .bubble .b-wave{font-size:14px;color:#fff;line-height:1;margin-bottom:1px;}
+  .bubble .b-name{font-family:var(--serif);font-size:11px;color:#fff;line-height:1.2;padding:0 3px;letter-spacing:.02em;}
+  .bubble .b-like{font-size:9px;color:rgba(255,255,255,.92);margin-top:2px;}
+  .bubble .b-like.on{color:#ffe1b0;}
+  @keyframes floatA{0%{transform:translate(0,0);}50%{transform:translate(3px,-7px);}100%{transform:translate(0,0);}}
+  .arch-empty{font-size:12px;line-height:1.7;padding:6px 2px;}
+  .r-source{font-size:11px;margin-top:12px;letter-spacing:.02em;}
+  /* 未玩过引导页 */
+  .invite-wrap{padding:40px 34px 0;text-align:center;display:flex;flex-direction:column;align-items:center;}
+  .invite-avs{display:flex;align-items:center;gap:14px;margin-bottom:30px;}
+  .invite-avs .ia{width:60px;height:60px;border-radius:50%;background:var(--fill);border:1px solid var(--line);}
+  .invite-avs .ia-q{width:60px;height:60px;border-radius:50%;border:1.5px dashed #cbc8c2;color:#a8a5a0;
+    font-family:var(--serif);font-size:26px;display:flex;align-items:center;justify-content:center;}
+  .invite-title{font-size:24px;line-height:1.6;color:var(--ink);}
+  .invite-sub{font-size:14px;color:var(--ink-2);line-height:1.9;margin-top:20px;}
+  .invite-from{margin-top:26px;font-size:12px;color:var(--ink-3);cursor:pointer;}
+  .invite-from b{color:var(--ink-2);font-weight:500;}
+  .me-codeentry{margin:6px 26px 24px;text-align:center;font-size:13px;color:var(--ink-2);text-decoration:underline;cursor:pointer;}
+
+  .demo-hint{position:fixed;bottom:10px;left:50%;transform:translateX(-50%);font-size:10px;color:#fff;background:rgba(0,0,0,.55);padding:6px 14px;border-radius:999px;z-index:99;letter-spacing:.04em;cursor:pointer;}
+
+  /* ===== 品牌首页 ===== */
+  .brand{text-align:center;padding:30px 34px 10px;display:flex;flex-direction:column;align-items:center;}
+  .brand .ambient{width:96px;height:96px;margin-bottom:24px;}
+  .brand-name{font-size:30px;letter-spacing:.14em;color:var(--ink);}
+  .brand-en{font-size:11px;letter-spacing:.34em;color:var(--ink-3);margin-top:8px;}
+  .brand-slogan{font-family:var(--serif);font-size:16px;line-height:1.9;color:var(--ink-2);margin-top:20px;}
+  .acts{padding:18px 26px 0;}
+  .acts-h{font-size:12px;color:var(--ink-3);letter-spacing:.16em;margin-bottom:12px;}
+  .act-card{display:flex;gap:14px;border:1px solid var(--line);border-radius:var(--radius);padding:14px;
+    box-shadow:var(--shadow);cursor:pointer;transition:transform .15s;}
+  .act-card:active{transform:scale(.99);}
+  .act-card.disabled{box-shadow:none;cursor:default;opacity:.85;}
+  .act-thumb{width:88px;height:88px;flex:none;border-radius:12px;background:var(--fill);border:1.5px dashed #cbc8c2;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;color:#a8a5a0;font-size:24px;}
+  .act-meta{flex:1;min-width:0;}
+  .act-status{font-size:11px;color:var(--ink-3);letter-spacing:.08em;}
+  .act-title{font-family:var(--serif);font-size:18px;font-weight:600;color:var(--ink);margin:5px 0 6px;}
+  .act-desc{font-size:12px;color:var(--ink-2);line-height:1.7;}
+  .act-go{font-size:12px;color:var(--ink);margin-top:9px;letter-spacing:.04em;}
+
+  /* ===== 活动介绍页 ===== */
+  .intro-hero{padding-top:8px;}
+  .intro-kicker{font-size:12px;color:var(--ink-3);letter-spacing:.26em;text-align:center;}
+  .intro-title{font-size:30px;text-align:center;margin:12px 0 22px;color:var(--ink);letter-spacing:.06em;}
+  .intro-cover{width:100%;aspect-ratio:4/3;border-radius:var(--radius);background:var(--fill);border:1.5px dashed #cbc8c2;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;color:#a8a5a0;font-size:12px;letter-spacing:.1em;}
+  .intro-body{padding:26px 2px 0;}
+  .intro-body p{font-family:var(--serif);font-size:16px;line-height:2;color:var(--ink);margin:0 0 22px;}
+  .intro-body h4{font-size:13px;color:var(--ink-3);letter-spacing:.18em;margin:0 0 16px;font-weight:500;}
+  .step{display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;}
+  .step .sn{flex:none;width:24px;height:24px;border-radius:50%;border:1px solid var(--ink);color:var(--ink);
+    font-family:var(--serif);font-size:13px;display:flex;align-items:center;justify-content:center;}
+  .step div{font-size:14px;line-height:1.7;color:var(--ink-2);padding-top:2px;}
+  .intro-foot{padding:16px 26px 30px;}
+  .intro-foot .codetip{text-align:center;font-size:12px;color:var(--ink-3);margin-top:16px;letter-spacing:.04em;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="device">
+<div class="notch"></div>
+<div class="phone">
+  <!-- 内容区：Tab 页与流程页都塞在这里，用 .screen 切换 -->
+  <div id="stage" style="flex:1;min-height:0;display:flex;flex-direction:column;">
+
+    <!-- ========== Tab1：声序实验室（品牌首页）========== -->
+    <section class="screen active" id="home" data-tab="1">
+      <div class="topbar"><div class="title">声序实验室</div></div>
+      <div class="body">
+        <!-- 品牌区 -->
+        <div class="brand">
+          <div class="ambient"></div>
+          <div class="brand-name display">声序实验室</div>
+          <div class="brand-en">SOUND SEQUENCE LAB</div>
+          <div class="brand-slogan">把丝竹之间的留白，<br>谱成只属于你的一段民乐。</div>
+        </div>
+        <!-- 正在进行的活动 -->
+        <div class="acts">
+          <div class="acts-h"><span>正在进行</span></div>
+          <div class="act-card" onclick="enterAct('intro')">
+            <div class="act-thumb">〰️<div class="placeholder-note" style="margin-top:6px;">活动主视觉位</div></div>
+            <div class="act-meta">
+              <div class="act-status">进行中 · 阿那亚</div>
+              <div class="act-title">情绪音乐</div>
+              <div class="act-desc">回答三个问题，把说不出口的情绪，留成一段只属于你的曲子。</div>
+              <div class="act-go">进入活动 →</div>
+            </div>
+          </div>
+          <div class="acts-h" style="margin-top:26px;"><span>即将到来</span></div>
+          <div class="act-card disabled">
+            <div class="act-thumb faint">＋</div>
+            <div class="act-meta">
+              <div class="act-status faint">敬请期待</div>
+              <div class="act-title faint">更多空间 · 更多声音</div>
+              <div class="act-desc">声序实验室会去到更多地方，把不同空间的感官，转译成声音。</div>
+            </div>
+          </div>
+        </div>
+        <div style="height:24px"></div>
+      </div>
+    </section>
+
+    <!-- ========== Tab2：我的（品牌层 · 个人中心）========== -->
+    <section class="screen" id="me" data-tab="2">
+      <div class="topbar"><div class="title">我的</div></div>
+      <div class="body">
+        <!-- 用户身份（微信） -->
+        <div class="me-head">
+          <div class="me-id">
+            <div class="av"></div>
+            <div>
+              <div class="nm">微信用户</div>
+              <div class="me-sub faint">声序实验室 · 已加入</div>
+            </div>
+          </div>
+        </div>
+        <!-- 我参与过的活动 -->
+        <div class="me-sec">
+          <h4><span>我参与过的活动</span></h4>
+          <div class="act-row" onclick="enterAct('intro')">
+            <div class="ar-thumb">〰️</div>
+            <div class="ar-meta">
+              <div class="ar-title">阿那亚 · 情绪音乐</div>
+              <div class="ar-sub">我的人格：黄昏独行者 · 测过 2 次</div>
+            </div>
+            <div class="ar-go">›</div>
+          </div>
+        </div>
+        <!-- 通用设置（占位） -->
+        <div class="me-sec">
+          <h4><span>设置</span></h4>
+          <div class="set-row" onclick="openFlow('notif')"><span>消息通知</span><span class="faint">›</span></div>
+          <div class="set-row" onclick="openFlow('about')"><span>关于声序实验室</span><span class="faint">›</span></div>
+        </div>
+        <div style="height:24px"></div>
+      </div>
+    </section>
+
+    <!-- ========== 流程页：阿那亚的我的（活动详情）========== -->
+    <section class="screen" id="actmine">
+      <div class="topbar flow"><div class="back" onclick="exitAct()">‹</div><div class="title">阿那亚 · 情绪音乐</div></div>
+      <div class="body">
+        <div class="me-head">
+          <div class="me-id">
+            <div class="av"></div>
+            <div>
+              <div class="nm">黄昏独行者</div>
+              <div class="badge" id="meBadge">线上体验者</div>
+            </div>
+          </div>
+          <div class="me-sub faint" style="margin-top:10px;">这是你在阿那亚 · 情绪音乐 里的身份</div>
+        </div>
+        <div class="me-sec">
+          <h4><span>我的情绪档案</span></h4>
+          <div class="archive" id="archiveList">
+            <div class="arch-card" onclick="openArchive('黄昏独行者','今天')"><div class="ai">〰️</div><div class="an">黄昏独行者</div><div class="ad">今天</div></div>
+            <div class="arch-card" onclick="openArchive('深海回声者','3 天前')"><div class="ai">〰️</div><div class="an">深海回声者</div><div class="ad">3 天前</div></div>
+            <div class="arch-card" onclick="startQuiz()"><div class="ai">＋</div><div class="an faint">再测一次</div><div class="ad"> </div></div>
+          </div>
+          <p class="arch-note faint">每次都会生成一条新的，旧的记录会一直保留。</p>
+        </div>
+        <div class="me-sec">
+          <h4><span>我收藏的</span></h4>
+          <div class="archive" id="collectedList">
+            <div class="arch-empty faint" id="collectedEmpty">在广场里点 ♥ 喜欢，就会收藏到这里。</div>
+          </div>
+        </div>
+        <div class="me-sec">
+          <h4><span>我的权益</span></h4>
+          <div class="perk" onclick="togglePerk(this)">
+            <div class="pi"></div>
+            <div class="perk-main"><div class="pt1">基础优惠</div><div class="pt2">线上完成体验即可获得</div>
+              <div class="perk-detail">
+                <div class="pd-row"><span>合作商家 9 折</span><span class="pd-code">码 8842</span></div>
+                <div class="pd-tip faint">向商家出示此页即可使用（核销码占位）</div>
+              </div>
+            </div>
+            <div class="lock">已解锁</div>
+          </div>
+          <div class="perk" onclick="togglePerk(this)">
+            <div class="pi"></div>
+            <div class="perk-main"><div class="pt1">线下完整体验权益</div><div class="pt2" id="offlinePerkSub">现场体验 + 兑换码解锁</div>
+              <div class="perk-detail">
+                <div class="pd-row"><span>合作商家 5 折 + 限定纪念卡</span><span class="pd-code">未解锁</span></div>
+                <div class="pd-tip faint">在阿那亚现场体验，或输入兑换码后解锁。</div>
+              </div>
+            </div>
+            <div class="lock" id="offlinePerk">未解锁</div>
+          </div>
+        </div>
+        <div class="me-codeentry" onclick="openFlow('code')">输入兑换码 · 领取线下完整权益</div>
+        <div style="height:24px"></div>
+      </div>
+    </section>
+
+    <!-- ========== 活动级 Tab：广场（海滩场景）========== -->
+    <section class="screen" id="plaza">
+      <div class="topbar"><div class="title">广场</div></div>
+      <div class="body">
+        <div class="plaza-refresh" onclick="renderPlaza()">换一批</div>
+        <div class="scene" id="scene">
+          <svg class="art" id="artSvg" viewBox="0 0 390 760" preserveAspectRatio="xMidYMid slice">
+            <!-- 天空（实色）-->
+            <rect id="skyRect" x="0" y="0" width="390" height="300"/>
+            <!-- 太阳（单纯一个实色圆）-->
+            <circle id="sunCore" cx="250" cy="120" r="34"/>
+            <!-- 海（最底色，铺到海平线以下）-->
+            <rect id="seaRect" x="0" y="296" width="390" height="464"/>
+            <!-- 海浪：每层色块的"上边缘"就是波浪曲线，向下填充到底；后一层盖前一层，颜色递深。
+                 泡沫白线用与色块上边缘完全相同的曲线，所以线正好压在颜色分界上。 -->
+            <path id="wv1" class="wv" d="M0 312 C 90 292 150 332 230 312 C 300 296 350 326 390 312 L390 760 L0 760 Z"/>
+            <path id="wf1" class="wf" d="M0 312 C 90 292 150 332 230 312 C 300 296 350 326 390 312"/>
+            <path id="wv2" class="wv" d="M0 372 C 80 350 160 394 250 372 C 320 355 360 388 390 374 L390 760 L0 760 Z"/>
+            <path id="wf2" class="wf" d="M0 372 C 80 350 160 394 250 372 C 320 355 360 388 390 374"/>
+            <path id="wv3" class="wv" d="M0 442 C 100 417 170 464 260 442 C 330 425 360 456 390 444 L390 760 L0 760 Z"/>
+            <path id="wf3" class="wf" d="M0 442 C 100 417 170 464 260 442 C 330 425 360 456 390 444"/>
+            <path id="wv4" class="wv" d="M0 512 C 90 488 180 534 270 512 C 340 496 365 524 390 514 L390 760 L0 760 Z"/>
+            <path id="wf4" class="wf" d="M0 512 C 90 488 180 534 270 512 C 340 496 365 524 390 514"/>
+            <!-- 浪花气泡圆点（落在各分界线附近）-->
+            <g id="dots" class="dots">
+              <circle cx="60" cy="320" r="3"/><circle cx="300" cy="318" r="3.5"/>
+              <circle cx="200" cy="382" r="3"/><circle cx="330" cy="378" r="2.5"/><circle cx="90" cy="386" r="2"/>
+              <circle cx="150" cy="452" r="3.5"/><circle cx="280" cy="448" r="2.5"/><circle cx="340" cy="456" r="3"/>
+              <circle cx="70" cy="524" r="3"/><circle cx="210" cy="534" r="2.5"/><circle cx="320" cy="522" r="3.5"/>
+            </g>
+            <!-- 沙滩：上边缘是波浪曲线，填到底；白边压在分界上 -->
+            <path id="beachShape" d="M0 588 C 110 568 210 608 300 588 C 345 578 370 596 390 588 L390 760 L0 760 Z"/>
+            <path id="beachFoam" class="wf" d="M0 588 C 110 568 210 608 300 588 C 345 578 370 596 390 588"/>
+          </svg>
+          <!-- 光球浮在海面（由 JS 在海面区域布局）-->
+          <div class="sea" id="sea"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 流程页：广场作品详情（听别人的曲子）========== -->
+    <section class="screen" id="plazaDetail">
+      <div class="topbar flow"><div class="back" onclick="switchAct('plaza')">‹</div><div class="title">广场作品</div></div>
+      <div class="body pad">
+        <div class="r-head">
+          <div class="r-tag-name" id="pdName">深海回声者</div>
+          <div class="r-tag-en">The Deep Echo</div>
+          <div class="r-source faint" id="pdBy">来自 一位匿名的朋友</div>
+        </div>
+        <div class="curve-img">
+          <span class="ph-ico">〰️</span>
+          <span class="ph-label">TA 的情绪音乐曲线（预设配图位）</span>
+        </div>
+        <div class="player" id="pdPlayer" onclick="togglePdPlay()">
+          <button class="play-btn" id="pdPlayIco">▶</button>
+          <div class="play-meta">
+            <div class="t1">TA 生成的曲子</div>
+            <div class="wave">
+              <i style="height:40%"></i><i style="height:70%"></i><i style="height:30%"></i><i style="height:85%"></i>
+              <i style="height:55%"></i><i style="height:40%"></i><i style="height:75%"></i><i style="height:35%"></i>
+              <i style="height:60%"></i><i style="height:45%"></i><i style="height:80%"></i><i style="height:50%"></i>
+              <i style="height:30%"></i><i style="height:65%"></i><i style="height:42%"></i><i style="height:70%"></i>
+            </div>
+            <div class="t2" id="pdPlayTime">0:00 / 0:15</div>
+          </div>
+        </div>
+        <div class="report">
+          <h4>关于 TA</h4>
+          <p id="pdDesc">习惯把情绪藏在平静的表面之下，望向远方多过回望过去。</p>
+        </div>
+      </div>
+      <div class="r-foot">
+        <div class="btnrow">
+          <button class="btn ghost" id="pdLikeBtn" onclick="togglePdLike()">♡ 喜欢</button>
+          <button class="btn" onclick="simWith()">和 TA 比相似度</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 流程页：消息通知 ========== -->
+    <section class="screen" id="notif">
+      <div class="topbar flow"><div class="back" onclick="switchTab('me')">‹</div><div class="title">消息通知</div></div>
+      <div class="body">
+        <div class="notif-list">
+          <div class="notif-item" onclick="enterAct('actmine')">
+            <div class="ni-dot"></div>
+            <div class="ni-body">
+              <div class="ni-title">你的曲子已生成</div>
+              <div class="ni-text">「黄昏独行者」的情绪音乐已经准备好了，点开听听看。</div>
+              <div class="ni-time">今天 14:32</div>
+            </div>
+            <div class="ni-go faint">›</div>
+          </div>
+          <div class="notif-item read" onclick="inActivity=true;document.getElementById('simYou').textContent=latestPersona;openFlow('sim')">
+            <div class="ni-dot"></div>
+            <div class="ni-body">
+              <div class="ni-title">有人和你的曲线很像</div>
+              <div class="ni-text">一位朋友的情绪曲线与你相似度 82%，去看看你们有多像。</div>
+              <div class="ni-time">昨天 21:08</div>
+            </div>
+            <div class="ni-go faint">›</div>
+          </div>
+          <div class="notif-item read" onclick="enterAct('intro')">
+            <div class="ni-dot"></div>
+            <div class="ni-body">
+              <div class="ni-title">阿那亚 · 情绪音乐 活动开启</div>
+              <div class="ni-text">声序实验室来到阿那亚了，回答三个问题，把情绪留成一段曲子。</div>
+              <div class="ni-time">3 天前</div>
+            </div>
+            <div class="ni-go faint">›</div>
+          </div>
+        </div>
+        <div class="notif-empty-tip faint">这里展示活动通知、生成完成、社交匹配等消息（占位数据）</div>
+      </div>
+    </section>
+
+    <!-- ========== 流程页：关于声序实验室 ========== -->
+    <section class="screen" id="about">
+      <div class="topbar flow"><div class="back" onclick="switchTab('me')">‹</div><div class="title">关于</div></div>
+      <div class="body pad">
+        <div class="about-hero">
+          <div class="ambient" style="margin:8px auto 22px;"></div>
+          <div class="about-name display">声序实验室</div>
+          <div class="about-en">SOUND SEQUENCE LAB</div>
+        </div>
+        <div class="about-body">
+          <p>声序实验室把丝竹之间的留白，谱成只属于你的一段民乐。</p>
+          <p>我们相信，那些说不出口的情绪、那些不同空间里被触动的瞬间，都可以被听见——我们做的，就是把它们转译成声音。</p>
+          <h4>我们做过的</h4>
+          <div class="about-row" onclick="enterAct('intro')" style="cursor:pointer;"><span>阿那亚 · 情绪音乐</span><span class="faint">2026 ›</span></div>
+          <div class="about-row faint"><span>更多空间，更多声音</span><span>敬请期待</span></div>
+        </div>
+        <div class="about-foot faint">
+          <div>声序实验室 · 占位介绍文案</div>
+          <div style="margin-top:6px;">版本 0.1.0（原型）</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 流程页：活动介绍（阿那亚）========== -->
+    <section class="screen" id="intro">
+      <div class="topbar flow"><div class="back" onclick="exitAct()">‹</div><div class="title">阿那亚 · 情绪音乐</div></div>
+      <div class="body pad">
+        <div class="brand-from" onclick="exitAct()">本活动来自 <b>声序实验室</b> ›</div>
+        <div class="intro-hero">
+          <div class="intro-kicker">A N E R Y A · 声序实验室</div>
+          <div class="intro-title display">情绪音乐</div>
+          <div class="intro-cover">活动主视觉位<div class="placeholder-note" style="margin-top:6px;">TODO: 设计师出图</div></div>
+        </div>
+        <div class="intro-body">
+          <p>在阿那亚的海边，把那点说不出口的情绪，交给一段民乐替你说完。</p>
+          <h4>怎么玩</h4>
+          <div class="step"><span class="sn">1</span><div>回答三个简单的问题，约一分钟。</div></div>
+          <div class="step"><span class="sn">2</span><div>我们读出你的情绪，为你谱一段只属于你的曲子。</div></div>
+          <div class="step"><span class="sn">3</span><div>得到你的情绪音乐曲线与人格标签，可分享、可与朋友比对。</div></div>
+        </div>
+      </div>
+      <div class="intro-foot">
+        <p class="privacy-note faint">你的回答只用于生成你的音乐，不会公开给任何人。</p>
+        <button class="btn" onclick="startQuiz()">开始</button>
+        <div class="codetip" onclick="openFlow('code')">线下体验过？输入兑换码 →</div>
+      </div>
+    </section>
+
+    <!-- ========== 流程页：答题 ========== -->
+    <section class="screen" id="quiz">
+      <div class="topbar flow"><div class="back" onclick="quizBack()">‹</div></div>
+      <div class="progress" id="progress"></div>
+      <div class="q-wrap">
+        <div class="q-index" id="qIndex"></div>
+        <div class="q-text" id="qText"></div>
+        <div class="q-hint" id="qHint"></div>
+
+        <!-- 语音输入区（默认） -->
+        <div class="voice-area" id="voiceArea">
+          <div class="voice-stage">
+            <button class="mic-btn" id="micBtn" onclick="toggleRec()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+            </button>
+            <div class="voice-waves" id="voiceWaves"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            <div class="voice-hint" id="voiceHint">点击麦克风，说说就好</div>
+            <div class="voice-timer" id="voiceTimer" style="display:none;">00:00</div>
+          </div>
+          <!-- 识别结果（录完出现，可编辑） -->
+          <div class="voice-result" id="voiceResult" style="display:none;">
+            <div class="vr-label faint">识别到（可修改）</div>
+            <textarea class="vr-text" id="vrText"></textarea>
+          </div>
+          <div class="switch-input" onclick="useType()">不方便说话？改用打字 →</div>
+        </div>
+
+        <!-- 打字输入区（备选） -->
+        <div class="type-area" id="typeArea" style="display:none;">
+          <textarea class="q-input" id="qInput"></textarea>
+          <div class="switch-input" onclick="useVoice()">← 改用语音</div>
+        </div>
+      </div>
+      <div class="q-foot"><button class="btn" id="qNext" onclick="quizNext()">下一题</button></div>
+    </section>
+
+    <!-- ========== 流程页：生成 ========== -->
+    <section class="screen" id="gen">
+      <div class="topbar flow"><div class="gen-exit" onclick="cancelGen()" style="margin-left:auto;">✕ 退出</div></div>
+      <div class="body">
+        <div class="gen-orb"></div>
+        <div class="gen-text" id="genText">正在听你说的话……</div>
+        <div class="gen-sub">为你谱一段曲子，请稍候</div>
+      </div>
+    </section>
+
+    <!-- ========== 流程页：结果 ========== -->
+    <section class="screen" id="result">
+      <div class="topbar flow"><div class="back" onclick="closeFlow()">‹</div><div class="title">你的情绪音乐</div></div>
+      <div class="body pad">
+        <div class="r-head">
+          <div class="r-tag-name" id="rName">黄昏独行者</div>
+          <div class="r-tag-en">The Dusk Wanderer</div>
+          <div class="r-source faint" id="rSource">以下人格、曲线与音乐，都来自你刚才的回答</div>
+        </div>
+        <div class="curve-img">
+          <span class="ph-ico">〰️</span>
+          <span class="ph-label">情绪音乐曲线（预设配图位）</span>
+          <span class="placeholder-note">TODO: 设计师统一出图</span>
+        </div>
+        <div class="player" id="player" onclick="togglePlay()">
+          <button class="play-btn" id="playIco">▶</button>
+          <div class="play-meta">
+            <div class="t1">为你生成的曲子 · demo</div>
+            <div class="wave">
+              <i style="height:40%"></i><i style="height:70%"></i><i style="height:30%"></i><i style="height:85%"></i>
+              <i style="height:55%"></i><i style="height:40%"></i><i style="height:75%"></i><i style="height:35%"></i>
+              <i style="height:60%"></i><i style="height:45%"></i><i style="height:80%"></i><i style="height:50%"></i>
+              <i style="height:30%"></i><i style="height:65%"></i><i style="height:42%"></i><i style="height:70%"></i>
+            </div>
+            <div class="t2" id="playTime">0:00 / 0:15</div>
+          </div>
+        </div>
+        <div class="report">
+          <h4>关于你</h4>
+          <p>你习惯在人群散去后才开口。情绪来得不急不缓，像黄昏的海——表面平静，底下有自己的潮汐。你把很多话留在了心里，但它们一直都在。</p>
+          <h4>你的四个维度</h4>
+          <div class="dim"><div class="dlabel"><span class="active">独处</span><span>共处</span></div><div class="dbar"><span style="left:22%"></span></div></div>
+          <div class="dim"><div class="dlabel"><span>涌动</span><span class="active">平静</span></div><div class="dbar"><span style="left:74%"></span></div></div>
+          <div class="dim"><div class="dlabel"><span>直说</span><span class="active">含蓄</span></div><div class="dbar"><span style="left:80%"></span></div></div>
+          <div class="dim"><div class="dlabel"><span class="active">回望过去</span><span>望向远方</span></div><div class="dbar"><span style="left:30%"></span></div></div>
+        </div>
+      </div>
+      <div class="r-foot">
+        <p class="saved-tip" id="savedTip">已自动存入「我的活动 · 情绪档案」</p>
+        <div style="height:12px"></div>
+        <div class="btnrow">
+          <button class="btn ghost" id="rFinishBtn" onclick="finishToMine()">完成，查看我的</button>
+          <button class="btn" onclick="openFlow('share','result')">生成分享卡片</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 流程页：分享卡片 ========== -->
+    <section class="screen" id="share">
+      <div class="topbar flow" style="position:absolute;z-index:2;background:transparent;"><div class="back" onclick="openFlow('result')">‹</div></div>
+      <div class="body">
+        <div class="card">
+          <div class="c-kicker">ANERYA · 情绪音乐</div>
+          <div class="c-name">黄昏独行者</div>
+          <div class="c-en">THE DUSK WANDERER</div>
+          <div class="c-img">曲线预设图位</div>
+          <div class="c-line">「把说不出口的那点情绪，<br>留成一段只属于我的曲子。」</div>
+          <div class="c-qr"><div class="qr"></div><div class="qt">扫码也测一次<br>看看我们有多像</div></div>
+        </div>
+      </div>
+      <div class="s-foot"><button class="btn" onclick="shareResult()">分享到群</button></div>
+    </section>
+
+    <!-- ========== 流程页：相似度（对方已玩过，从分享卡片进入）========== -->
+    <section class="screen" id="sim">
+      <div class="topbar flow"><div class="back" onclick="closeFlow()">‹</div><div class="title">你们有多像</div></div>
+      <div class="body">
+        <div class="pk-top"><div class="pk-score">82<span class="pct">%</span></div><div class="pk-label">情绪曲线相似度</div></div>
+        <div class="pk-vs">
+          <div class="pk-person"><div class="av"></div><div class="nm">你</div><div class="ty" id="simYou">黄昏独行者</div></div>
+          <div class="vs">VS</div>
+          <div class="pk-person"><div class="av"></div><div class="nm">Ta</div><div class="ty">深海回声者</div></div>
+        </div>
+        <div class="pk-curve">两条曲线叠合图位</div>
+        <div class="pk-read"><div class="quote">你们都习惯把情绪藏在平静的表面之下。不同的是，你回望过去，而 Ta 望向远方——也许正好能聊聊，对方看到的是什么。</div></div>
+      </div>
+      <div class="pk-foot">
+        <button class="btn" onclick="shareResult()">我也分享我的，邀更多人来比</button>
+      </div>
+    </section>
+
+    <!-- ========== 流程页：未玩过引导（从分享卡片进入但还没玩）========== -->
+    <section class="screen" id="siminvite">
+      <div class="topbar flow"><div class="back" onclick="exitAct()">‹</div><div class="title">你们有多像</div></div>
+      <div class="body">
+        <div class="invite-wrap">
+          <div class="invite-avs">
+            <div class="ia"></div>
+            <div class="ia-q">?</div>
+          </div>
+          <div class="invite-title display">一位朋友想知道<br>你们有多像</div>
+          <div class="invite-sub">Ta 已经测过「黄昏独行者」。<br>你也来测一次，就能看到你们的情绪曲线相似度。</div>
+          <div class="invite-from" onclick="exitAct()">本活动来自 <b>声序实验室</b> ›</div>
+        </div>
+      </div>
+      <div class="intro-foot">
+        <button class="btn" onclick="switchAct('intro')">去看看这是什么</button>
+      </div>
+    </section>
+
+    <!-- ========== 流程页：兑换码 ========== -->
+    <section class="screen" id="code">
+      <div class="topbar flow"><div class="back" onclick="codeBack()">‹</div><div class="title">兑换码</div></div>
+      <div class="body">
+        <div class="code-wrap">
+          <div class="code-title">输入你的兑换码</div>
+          <div class="code-sub">在阿那亚现场体验后获得的码，<br>可解锁专属身份与优惠。</div>
+          <input class="code-input" id="codeInput" placeholder="– – – –" maxlength="8">
+          <div style="height:30px"></div>
+          <button class="btn" onclick="redeem()">解锁</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- 底部 TabBar：仅 Tab 页显示 -->
+  <nav class="tabbar" id="tabbar">
+    <div class="tab on" data-go="home" onclick="switchTab('home')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 3v2M12 19v2M3 12h2M19 12h2M6 6l1.4 1.4M16.6 16.6 18 18M18 6l-1.4 1.4M7.4 16.6 6 18"/><circle cx="12" cy="12" r="4"/></svg></div>
+      <div class="lb">实验室</div>
+    </div>
+    <div class="tab" data-go="me" onclick="switchTab('me')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg></div>
+      <div class="lb">我的</div>
+    </div>
+  </nav>
+
+  <!-- 活动级 TabBar：仅进入活动后显示（复用 intro=活动主页 / actmine=我的活动）-->
+  <nav class="tabbar" id="acttabbar" style="display:none;">
+    <div class="tab on" data-ago="intro" onclick="switchAct('intro')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 11.5 12 5l8 6.5"/><path d="M6 10.5V19h12v-8.5"/></svg></div>
+      <div class="lb">活动主页</div>
+    </div>
+    <div class="tab" data-ago="plaza" onclick="switchAct('plaza')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="8.2"/><path d="M8.5 13.5q3.5-5 7-1"/><circle cx="9" cy="10" r="1"/></svg></div>
+      <div class="lb">广场</div>
+    </div>
+    <div class="tab" data-ago="actmine" onclick="switchAct('actmine')">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg></div>
+      <div class="lb">我的活动</div>
+    </div>
+  </nav>
+</div><!-- /.phone -->
+<div class="home-ind"></div>
+</div><!-- /.device -->
+
+<div class="demo-hint" id="hint">原型演示 · 点 here 模拟"点开朋友的分享卡片"</div>
+
+<script>
+const ACT_TABS=['intro','actmine'];
+const brandBar=()=>document.getElementById('tabbar');
+const actBar=()=>document.getElementById('acttabbar');
+
+function showOnly(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  scrollTopOf(id);
+}
+function scrollTopOf(id){const b=document.getElementById(id).querySelector('.body'); if(b)b.scrollTop=0;}
+
+/* ---- 品牌层 Tab（实验室 / 我的）---- */
+function switchTab(id){
+  showOnly(id);
+  brandBar().style.display='flex'; actBar().style.display='none';
+  document.querySelectorAll('#tabbar .tab').forEach(t=>t.classList.toggle('on',t.dataset.go===id));
+}
+
+/* ---- 进入活动层 ----
+   brandOrigin: 记住进活动前在品牌层的哪个 Tab（实验室/我的），退出时回到那里
+   flowOrigin: 记住进入某个流程页（结果/兑换码等）前的活动 Tab，返回时回到那里 */
+let inActivity=false, brandOrigin='home', flowOrigin='intro';
+function enterAct(tab){
+  // 记录来处：当前高亮的品牌 Tab
+  const cur=document.querySelector('#tabbar .tab.on');
+  brandOrigin = cur ? cur.dataset.go : 'home';
+  inActivity=true;
+  switchAct(tab||'intro');
+}
+function switchAct(id){
+  showOnly(id);
+  brandBar().style.display='none'; actBar().style.display='flex';
+  document.querySelectorAll('#acttabbar .tab').forEach(t=>t.classList.toggle('on',t.dataset.ago===id));
+  if(id==='plaza' && !plazaRendered) renderPlaza();
+}
+/* 退出活动 → 回到进活动前所在的品牌 Tab（来处-去处） */
+function exitAct(){ inActivity=false; switchTab(brandOrigin); }
+
+/* ---- 流程页：两套底栏都隐藏。打开时记住来处的活动 Tab ---- */
+function openFlow(id, origin){
+  if(origin) flowOrigin=origin;
+  showOnly(id);
+  brandBar().style.display='none'; actBar().style.display='none';
+}
+/* 流程结束/返回：回到打开它之前的活动 Tab（来处-去处） */
+function closeFlow(){ if(inActivity) switchAct(flowOrigin); else switchTab(brandOrigin); }
+
+/* ===== 答题 ===== */
+const QUESTIONS=[
+  {idx:'第 1 个问题 / 共 3 个',text:'此刻在阿那亚，你最想待着的是什么时间？',hint:'清晨、黄昏，还是深夜的海边？',ph:'随便写写，不用想太多……'},
+  {idx:'第 2 个问题 / 共 3 个',text:'最近有没有什么事，一直放在心里、没怎么跟人说？',hint:'不用具体，写个大概的感觉也行。',ph:'写下心里的那件事……'},
+  {idx:'第 3 个问题 / 共 3 个',text:'有没有一句话，你一直想对某个人说，却始终没说出口？',hint:'不用是什么大事——可能只是一个具体的瞬间，一个具体的人。',ph:'那句没说出口的话……'},
+];
+let qi=0;
+/* 用户当前在本活动里的"最新人格"——再测会更新它，相似度匹配以它为准（#4）*/
+let latestPersona='黄昏独行者';
+
+function startQuiz(){ inActivity=true; qi=0; useVoice(); openFlow('quiz'); renderQ(); }
+function renderQ(){
+  const q=QUESTIONS[qi];
+  qIndex.textContent=q.idx; qText.textContent=q.text; qHint.textContent=q.hint;
+  qInput.value=''; qInput.placeholder=q.ph;
+  resetVoice();
+  const p=document.getElementById('progress'); p.innerHTML='';
+  QUESTIONS.forEach((_,i)=>{const s=document.createElement('div');s.className='seg'+(i<=qi?' on':'');p.appendChild(s);});
+  qNext.textContent = qi===QUESTIONS.length-1 ? '完成，生成我的曲子':'下一题';
+}
+function quizNext(){ stopRecIfAny(); if(qi<QUESTIONS.length-1){qi++;renderQ();} else {openFlow('gen');runGen();} }
+function quizBack(){ stopRecIfAny(); if(qi>0){qi--;renderQ();} else switchAct('intro'); }
+
+/* ===== 语音 / 打字 输入切换 ===== */
+function useVoice(){ document.getElementById('voiceArea').style.display='flex'; document.getElementById('typeArea').style.display='none'; }
+function useType(){ document.getElementById('typeArea').style.display='flex'; document.getElementById('voiceArea').style.display='none'; }
+
+/* ===== 语音录制（模拟）=====
+   真机：wx.getRecorderManager() 录音 → 上传后端 → 多模态大模型听音频做情绪分析。
+   这里只做录音动画 + 模拟识别文字。 */
+let recording=false, recTimer=null, recSec=0;
+function resetVoice(){
+  recording=false; if(recTimer){clearInterval(recTimer);recTimer=null;} recSec=0;
+  micBtn.classList.remove('rec');
+  document.getElementById('voiceWaves').classList.remove('on');
+  document.getElementById('voiceHint').textContent='点击麦克风，说说就好';
+  document.getElementById('voiceTimer').style.display='none';
+  document.getElementById('voiceTimer').textContent='00:00';
+  document.getElementById('voiceResult').style.display='none';
+  document.getElementById('vrText').value='';
+}
+function toggleRec(){
+  if(!recording){
+    recording=true; recSec=0;
+    micBtn.classList.add('rec');
+    document.getElementById('voiceWaves').classList.add('on');
+    document.getElementById('voiceHint').textContent='正在聆听…再次点击结束';
+    const tEl=document.getElementById('voiceTimer'); tEl.style.display='block';
+    recTimer=setInterval(()=>{recSec++; const m=String(Math.floor(recSec/60)).padStart(2,'0'),s=String(recSec%60).padStart(2,'0'); tEl.textContent=`${m}:${s}`;},1000);
+  } else {
+    recording=false;
+    if(recTimer){clearInterval(recTimer);recTimer=null;}
+    micBtn.classList.remove('rec');
+    document.getElementById('voiceWaves').classList.remove('on');
+    document.getElementById('voiceHint').textContent='识别完成，可点麦克风重录';
+    // 模拟识别结果（真机为大模型/ASR 返回的文字）
+    const vr=document.getElementById('voiceResult'); vr.style.display='block';
+    document.getElementById('vrText').value='（这里是识别出来的文字，可以修改…）';
+  }
+}
+function stopRecIfAny(){ if(recording){ recording=false; if(recTimer){clearInterval(recTimer);recTimer=null;} micBtn.classList.remove('rec'); } }
+
+/* ===== 生成（模拟 Suno 异步）===== */
+const GEN_STEPS=['正在听你说的话……','读出你藏起来的情绪……','正在谱一段曲子……'];
+let genTimer=null;
+function runGen(){
+  let s=0; genText.textContent=GEN_STEPS[0];
+  genTimer=setInterval(()=>{
+    s++;
+    if(s<GEN_STEPS.length){genText.style.opacity=0;setTimeout(()=>{genText.textContent=GEN_STEPS[s];genText.style.opacity=1;},400);}
+    else{clearInterval(genTimer);genTimer=null;setTimeout(()=>showFreshResult(),900);}
+  },1500);
+  // TODO: 真实环境——调用情绪匹配 + Suno；成功后展示结果；超时/失败降级为预置兜底曲目。
+}
+/* 生成中退出：中断并回活动主页 */
+function cancelGen(){
+  if(genTimer){clearInterval(genTimer);genTimer=null;}
+  if(confirm('要放弃这次生成吗？已填写的内容不会保存。')) switchAct('intro'); else runGen();
+}
+
+/* 新生成的结果：自动存档（往档案列表插一条新卡，#9）、更新最新人格、结果页显示"刚生成"态 */
+function showFreshResult(){
+  // 这里用固定人格演示；真实环境由算法根据答案生成
+  latestPersona='黄昏独行者';
+  insertArchiveCard(latestPersona);
+  document.getElementById('rName').textContent=latestPersona;
+  document.getElementById('rSource').textContent='以下人格、曲线与音乐，都来自你刚才的回答';
+  document.getElementById('savedTip').style.display='';
+  document.getElementById('rFinishBtn').style.display='';
+  flowOrigin='intro';
+  openFlow('result');
+}
+/* 查看旧档案：结果页显示"历史记录"态，返回回到「我的活动」（#2 #3）*/
+function openArchive(name, when){
+  document.getElementById('rName').textContent=name;
+  document.getElementById('rSource').textContent='这是你在 '+when+' 生成的记录';
+  document.getElementById('savedTip').style.display='none';
+  document.getElementById('rFinishBtn').style.display='none';
+  openFlow('result','actmine');   // 来处=我的活动，返回回到这里
+}
+/* 往档案列表插入一条新记录（#9）*/
+function insertArchiveCard(name){
+  const list=document.getElementById('archiveList');
+  if(!list) return;
+  const card=document.createElement('div');
+  card.className='arch-card';
+  card.setAttribute('onclick',`openArchive('${name}','刚刚')`);
+  card.innerHTML=`<div class="ai">〰️</div><div class="an">${name}</div><div class="ad">刚刚</div>`;
+  list.insertBefore(card, list.firstChild);   // 插到最前，旧的保留
+}
+
+/* ===== 播放器 ===== */
+let playing=false,ptimer=null,psec=0;
+function togglePlay(){
+  const p=document.getElementById('player');playing=!playing;
+  if(playing){p.classList.add('playing');playIco.textContent='❚❚';
+    ptimer=setInterval(()=>{psec=(psec+1)%16;playTime.textContent=`0:${String(psec).padStart(2,'0')} / 0:15`;},1000);}
+  else{p.classList.remove('playing');playIco.textContent='▶';clearInterval(ptimer);}
+}
+
+/* ===== 兑换码 ===== */
+let codeFrom='actmine';
+function redeem(){
+  const v=codeInput.value.trim(); if(!v){alert('请输入兑换码');return;}
+  // TODO: 真实环境——校验码、写入"线下完整体验"身份与权益
+  meBadge.textContent='线下完整体验者';
+  offlinePerk.textContent='已解锁';
+  document.getElementById('offlinePerkSub').textContent='已通过兑换码解锁';
+  // 解锁后把线下权益详情里的"未解锁"也更新掉
+  const codes=document.querySelectorAll('#actmine .perk');
+  if(codes[1]){const c=codes[1].querySelector('.pd-code'); if(c)c.textContent='码 5530';}
+  alert('解锁成功！已获得线下完整体验的全部权益。'); switchAct('actmine');
+}
+function codeBack(){ switchAct('actmine'); }
+
+/* ===== 权益展开 ===== */
+function togglePerk(el){ el.classList.toggle('open'); }
+
+/* ===== 分享 ===== */
+function shareResult(){
+  // TODO: 真实环境——生成带参数的分享卡片 + 调用 wx 原生分享
+  alert('分享成功！\\n朋友点开你的卡片后：\\n· 玩过 → 看到你们的相似度\\n· 没玩过 → 被引导来体验');
+}
+
+/* 结果页"完成"出口：进入活动层并落在「我的活动」 */
+function finishToMine(){ inActivity=true; switchAct('actmine'); }
+
+/* ===== 广场 · 漂浮海域 ===== */
+const PLAZA=[
+  {name:'深海回声者', desc:'习惯把情绪藏在平静的表面之下，望向远方多过回望过去。', likes:42},
+  {name:'清晨骤雨型', desc:'来得快去得也快，情绪像一阵突然的雨，落完天就晴了。', likes:31},
+  {name:'黄昏独行者', desc:'在人群散去后才开口，把很多话留在了心里。', likes:58},
+  {name:'暗涌者', desc:'表面安静，底下一直有自己的潮汐在走。', likes:19},
+  {name:'晴窗型', desc:'情绪透亮，愿意把心里的事摊开在光里说。', likes:27},
+  {name:'夜航者', desc:'喜欢在深夜独处时，才和自己的情绪对话。', likes:36},
+  {name:'远雷型', desc:'情绪在很远的地方滚动，等靠近时往往已经过去。', likes:23},
+  {name:'退潮者', desc:'习惯在喧闹退去之后，才慢慢露出心里的样子。', likes:44},
+  {name:'薄雾型', desc:'看不太真切，却始终笼在一层温柔的情绪里。', likes:15},
+  {name:'潮间带', desc:'在靠近与退开之间反复，像潮水来回的那条线。', likes:38},
+];
+const liked = {};  // 已点赞/收藏：index -> true
+let plazaRendered=false;
+
+/* 按用户当前真实时间，给海面上色（清晨/白天/黄昏/深夜）*/
+function applyTimeOfDay(){
+  const w=document.getElementById('scene'); if(!w) return;
+  const h=new Date().getHours();
+  let t = (h>=5&&h<9)?'dawn' : (h>=9&&h<17)?'day' : (h>=17&&h<20)?'dusk' : 'night';
+  w.className='scene '+t;
+}
+
+/* 纯随机抽 8 个，错落不重叠地铺在“海域”里（#5 纯随机 / #1 克制漂浮）*/
+function renderPlaza(){
+  applyTimeOfDay();
+  const sea=document.getElementById('sea'); if(!sea) return;
+  sea.innerHTML='';
+  const W=(sea.clientWidth && sea.clientWidth>100)? sea.clientWidth : 360;
+  const H=(sea.clientHeight && sea.clientHeight>100)? sea.clientHeight : 320;
+  const idxs=[...PLAZA.keys()].sort(()=>Math.random()-0.5).slice(0,6);
+  const placed=[];
+  idxs.forEach((idx)=>{
+    const size = 70 + Math.round(Math.random()*26); // 70~96，海面带较窄，球小一点
+    const r=size/2;
+    let x=0,y=0,ok=false,tries=0;
+    while(!ok && tries<120){
+      x = Math.random()*(W-size);
+      y = Math.random()*(H-size-26)+8; // 上留一点、下避开浪花，整体落在海面带内
+      const cx=x+r, cy=y+r;
+      ok = placed.every(p=>Math.hypot(cx-p.x,cy-p.y) > (r+p.r+14));
+      tries++;
+    }
+    if(!ok) return; // 实在放不下就跳过，宁可少一个也不重叠
+    placed.push({x:x+r,y:y+r,r});
+    const p=PLAZA[idx], on=liked[idx];
+    const el=document.createElement('div');
+    el.className='bubble';
+    el.style.width=el.style.height=size+'px';
+    el.style.left=x+'px'; el.style.top=y+'px';
+    el.style.setProperty('--dur',(6.5+Math.random()*4).toFixed(1)+'s');
+    el.style.setProperty('--delay',(Math.random()*3).toFixed(1)+'s');
+    el.setAttribute('onclick',`openPlazaDetail(${idx})`);
+    el.innerHTML=`<div class="b-wave">〰️</div><div class="b-name">${p.name}</div><div class="b-like ${on?'on':''}">${on?'♥':'♡'} ${p.likes}</div>`;
+    sea.appendChild(el);
+  });
+  plazaRendered=true;
+}
+
+let pdIndex=0;
+function openPlazaDetail(i){
+  pdIndex=i; const p=PLAZA[i];
+  document.getElementById('pdName').textContent=p.name;
+  document.getElementById('pdDesc').textContent=p.desc;
+  document.getElementById('pdBy').textContent='来自 一位匿名的朋友';
+  // 点赞按钮反映当前收藏状态
+  const btn=document.getElementById('pdLikeBtn');
+  btn.textContent = liked[i] ? '♥ 已喜欢' : '♡ 喜欢';
+  if(pdPlaying) togglePdPlay();
+  openFlow('plazaDetail','plaza');
+}
+/* 广场详情播放器 */
+let pdPlaying=false,pdTimer=null,pdSec=0;
+function togglePdPlay(){
+  const p=document.getElementById('pdPlayer');pdPlaying=!pdPlaying;
+  if(pdPlaying){p.classList.add('playing');document.getElementById('pdPlayIco').textContent='❚❚';
+    pdTimer=setInterval(()=>{pdSec=(pdSec+1)%16;document.getElementById('pdPlayTime').textContent=`0:${String(pdSec).padStart(2,'0')} / 0:15`;},1000);}
+  else{p.classList.remove('playing');document.getElementById('pdPlayIco').textContent='▶';clearInterval(pdTimer);}
+}
+/* 点赞 = 收藏（#2）：更新赞数 + 写入"我的活动·我收藏的" */
+function togglePdLike(){
+  const i=pdIndex, on=!liked[i]; liked[i]=on;
+  PLAZA[i].likes += on?1:-1;
+  document.getElementById('pdLikeBtn').textContent = on ? '♥ 已喜欢' : '♡ 喜欢';
+  renderCollected();
+}
+/* 渲染"我收藏的"（来自广场点赞）*/
+function renderCollected(){
+  const list=document.getElementById('collectedList'); if(!list) return;
+  const ids=Object.keys(liked).filter(k=>liked[k]);
+  if(ids.length===0){
+    list.innerHTML='<div class="arch-empty faint">在广场里点 ♥ 喜欢，就会收藏到这里。</div>';
+    return;
+  }
+  list.innerHTML='';
+  ids.forEach(k=>{
+    const p=PLAZA[k];
+    const c=document.createElement('div');
+    c.className='arch-card';
+    c.setAttribute('onclick',`openPlazaDetail(${k})`);
+    c.innerHTML=`<div class="ai">〰️</div><div class="an">${p.name}</div><div class="ad">已收藏</div>`;
+    list.appendChild(c);
+  });
+}
+/* 从广场作品发起相似度比对（接现成相似度页）*/
+function simWith(){
+  document.getElementById('simYou').textContent=latestPersona;
+  const taTy=document.querySelectorAll('#sim .pk-person .ty')[1];
+  if(taTy) taTy.textContent=PLAZA[pdIndex].name;
+  openFlow('sim','plaza');
+}
+
+/* ===== 演示：模拟"别人点开分享卡片"的两条分支 =====
+   真实环境由分享链接参数 + 该用户是否玩过 决定，这里用调试按钮演示 */
+function demoShareEntry(){
+  const played = confirm('演示：模拟点开朋友分享的卡片。\\n\\n确定 = 你"已玩过"（看相似度）\\n取消 = 你"没玩过"（被引导体验）');
+  inActivity = true;
+  if(played){
+    document.getElementById('simYou').textContent=latestPersona; // 以你最新一次成绩匹配（#4）
+    openFlow('sim');
+  } else {
+    openFlow('siminvite');
+  }
+}
+hint.onclick=demoShareEntry;
+</script>
+</body>
+</html>

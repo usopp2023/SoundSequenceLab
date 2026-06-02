@@ -1,0 +1,65 @@
+@import "./scene.wxss";
+
+.plaza-wrap {
+  position: relative;
+  height: calc(100vh - 110rpx - env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+
+/* 全屏海滩场景背景 */
+.scene {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+
+/* 海面带：光球漂浮的区域（上 39%、高 35%）*/
+.sea {
+  position: absolute;
+  left: 0; right: 0;
+  top: 39%;
+  height: 35%;
+  z-index: 3;
+}
+
+.bubble {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .26);
+  border: 3rpx solid rgba(255, 255, 255, .85);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 10rpx;
+  animation: floatA var(--dur, 7s) ease-in-out infinite var(--delay, 0s);
+}
+.bubble::after {
+  content: "";
+  position: absolute; top: 18%; left: 24%;
+  width: 18%; height: 18%; border-radius: 50%;
+  background: rgba(255, 255, 255, .9);
+}
+.bubble-press { transform: scale(.95); }
+.b-wave { font-size: 28rpx; color: #fff; line-height: 1; margin-bottom: 2rpx; }
+.b-name { font-family: var(--serif); font-size: 22rpx; color: #fff; line-height: 1.2; padding: 0 6rpx; letter-spacing: .02em; }
+.b-like { font-size: 18rpx; color: rgba(255, 255, 255, .92); margin-top: 4rpx; }
+.b-like.on { color: #ffe1b0; }
+
+@keyframes floatA {
+  0% { transform: translate(0, 0); }
+  50% { transform: translate(6rpx, -14rpx); }
+  100% { transform: translate(0, 0); }
+}
+
+.plaza-refresh {
+  position: absolute;
+  left: 50%; bottom: 60rpx;
+  transform: translateX(-50%);
+  z-index: 5;
+  font-size: 26rpx; color: #7a6a52; letter-spacing: .08em;
+  background: rgba(255, 255, 255, .5);
+  border: 1rpx solid rgba(122, 106, 82, .25);
+  border-radius: 999rpx;
+  padding: 16rpx 44rpx;
+}
+.refresh-press { transform: translateX(-50%) scale(.97); }

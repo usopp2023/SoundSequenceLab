@@ -1,0 +1,21 @@
+.sim-wrap { min-height: 100vh; background: #fff; }
+.pk-top { padding: 52rpx 52rpx 20rpx; text-align: center; }
+.pk-score { font-family: var(--serif); font-size: 128rpx; font-weight: 600; line-height: 1; color: var(--ink); }
+.pk-score .pct { font-size: 48rpx; }
+.pk-label { font-size: 26rpx; color: var(--ink-2); letter-spacing: .1em; margin-top: 20rpx; }
+
+.pk-vs { display: flex; align-items: center; gap: 28rpx; padding: 44rpx 52rpx; }
+.pk-person { flex: 1; text-align: center; }
+.pk-person .av { width: 108rpx; height: 108rpx; border-radius: 50%; background: var(--fill); border: 1rpx solid var(--line); margin: 0 auto 20rpx; }
+.pk-person .nm { font-family: var(--serif); font-size: 30rpx; color: var(--ink); }
+.pk-person .ty { font-size: 22rpx; color: var(--ink-3); margin-top: 6rpx; }
+.pk-vs .vs { font-family: var(--serif); font-size: 26rpx; color: var(--ink-3); }
+
+.pk-curve {
+  margin: 0 52rpx; aspect-ratio: 16 / 9; border-radius: var(--radius);
+  background: var(--fill); border: 3rpx dashed #cbc8c2;
+  display: flex; align-items: center; justify-content: center; color: #a8a5a0; font-size: 22rpx; letter-spacing: .1em;
+}
+.pk-read { padding: 44rpx 52rpx; }
+.pk-read .quote { font-family: var(--serif); font-size: 32rpx; line-height: 2; color: var(--ink); }
+.pk-foot { padding: 16rpx 52rpx 60rpx; }

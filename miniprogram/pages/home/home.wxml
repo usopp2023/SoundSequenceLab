@@ -1,0 +1,33 @@
+<view class="tabpage-pad">
+  <!-- 品牌区 -->
+  <view class="brand">
+    <view class="ambient"></view>
+    <view class="brand-name display">声序实验室</view>
+    <view class="brand-en">SOUND SEQUENCE LAB</view>
+    <view class="brand-slogan">把丝竹之间的留白，<text class="br"></text>谱成只属于你的一段民乐。</view>
+  </view>
+
+  <!-- 正在进行的活动 -->
+  <view class="acts">
+    <view class="acts-h">正在进行</view>
+    <view class="act-card" hover-class="card-press" bindtap="enterAct">
+      <view class="act-thumb">〰️<view class="placeholder-note">活动主视觉位</view></view>
+      <view class="act-meta">
+        <view class="act-status">进行中 · 阿那亚</view>
+        <view class="act-title">情绪音乐</view>
+        <view class="act-desc">回答三个问题，把说不出口的情绪，留成一段只属于你的曲子。</view>
+        <view class="act-go">进入活动 →</view>
+      </view>
+    </view>
+
+    <view class="acts-h mt">即将到来</view>
+    <view class="act-card disabled">
+      <view class="act-thumb faint">＋</view>
+      <view class="act-meta">
+        <view class="act-status faint">敬请期待</view>
+        <view class="act-title faint">更多空间 · 更多声音</view>
+        <view class="act-desc">声序实验室会去到更多地方，把不同空间的感官，转译成声音。</view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,48 @@
+<scroll-view scroll-y class="page-scroll">
+  <view class="pad">
+    <view class="r-head">
+      <view class="r-tag-name">{{result.persona.name}}</view>
+      <view class="r-tag-en">{{result.persona.en}}</view>
+      <view class="r-source faint">{{sourceText}}</view>
+    </view>
+
+    <view class="curve-img ph-box">
+      <view class="ph-ico">〰️</view>
+      <view class="ph-label">情绪音乐曲线（预设配图位）</view>
+      <view class="placeholder-note">TODO: 设计师统一出图</view>
+    </view>
+
+    <view class="player {{playing ? 'playing' : ''}}" hover-class="player-press" bindtap="togglePlay">
+      <view class="play-btn">{{playing ? '❚❚' : '▶'}}</view>
+      <view class="play-meta">
+        <view class="t1">为你生成的曲子 · demo</view>
+        <view class="wave">
+          <view class="bar" wx:for="{{waveBars}}" wx:key="index" style="height:{{item}}%"></view>
+        </view>
+        <view class="t2">{{playTimeLabel}}</view>
+      </view>
+    </view>
+
+    <view class="report">
+      <view class="r-h4">关于你</view>
+      <view class="r-p">{{result.report}}</view>
+
+      <view class="r-h4">你的四个维度</view>
+      <view class="dim" wx:for="{{result.dims}}" wx:key="left">
+        <view class="dlabel">
+          <text class="{{item.activeSide === 'left' ? 'active' : ''}}">{{item.left}}</text>
+          <text class="{{item.activeSide === 'right' ? 'active' : ''}}">{{item.right}}</text>
+        </view>
+        <view class="dbar"><view class="dot" style="left:{{item.value}}%"></view></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="r-foot pad">
+    <view wx:if="{{showSaved}}" class="saved-tip">已自动存入「我的活动 · 情绪档案」</view>
+    <view class="btnrow">
+      <button wx:if="{{showFinish}}" class="btn ghost" hover-class="active-press" bindtap="finishToMine">完成，查看我的</button>
+      <button class="btn" hover-class="active-press" bindtap="openShare">生成分享卡片</button>
+    </view>
+  </view>
+</scroll-view>

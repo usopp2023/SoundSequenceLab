@@ -1,0 +1,15 @@
+<view class="invite-page">
+  <view class="invite-wrap">
+    <view class="invite-avs">
+      <view class="ia"></view>
+      <view class="ia-q">?</view>
+    </view>
+    <view class="invite-title display">一位朋友想知道<text class="br"></text>你们有多像</view>
+    <view class="invite-sub">Ta 已经测过「{{fromName}}」。<text class="br"></text>你也来测一次，就能看到你们的情绪曲线相似度。</view>
+    <view class="invite-from" bindtap="toBrand">本活动来自 <text class="b">声序实验室</text> ›</view>
+  </view>
+
+  <view class="invite-foot">
+    <button class="btn" hover-class="active-press" bindtap="goIntro">去看看这是什么</button>
+  </view>
+</view>
