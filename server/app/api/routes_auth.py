@@ -21,16 +21,16 @@ def login(req: schemas.LoginReq):
     return schemas.LoginResp(openid=f"dev_{digest}")
 
 
+# 演示用完整权益兑换码（V3）。TODO(real): 改为校验码库/绑定 openid/防重复核销。
+FULL_CODE = "anysxzn2026"
+
+
 @router.post("/redeem", response_model=schemas.RedeemResp)
 def redeem(req: schemas.RedeemReq):
-    """占位：任意非空码视为有效。"""
+    """校验固定演示码 anysxzn2026（忽略大小写）→ 解锁完整权益。"""
     code = (req.code or "").strip()
     if not code:
-        return schemas.RedeemResp(ok=False, message="兑换码无效")
-    # TODO(real): 校验码是否存在/未使用，绑定到当前 openid。
-    return schemas.RedeemResp(
-        ok=True,
-        unlocked=True,
-        badge="线下完整体验者",
-        perkCode="码 5530",
-    )
+        return schemas.RedeemResp(ok=False, message="请输入兑换码")
+    if code.lower() != FULL_CODE:
+        return schemas.RedeemResp(ok=False, message="兑换码不正确，请检查后重试")
+    return schemas.RedeemResp(ok=True, unlocked=True)

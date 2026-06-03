@@ -41,6 +41,6 @@
   </view>
 
   <view class="q-foot">
-    <button class="btn" hover-class="active-press" bindtap="quizNext">{{nextLabel}}</button>
+    <button class="btn {{canNext ? '' : 'disabled'}}" disabled="{{!canNext}}" hover-class="active-press" bindtap="quizNext">{{nextLabel}}</button>
   </view>
 </view>

@@ -33,4 +33,6 @@
 .act-status { font-size: 22rpx; color: var(--ink-3); letter-spacing: .08em; }
 .act-title { font-family: var(--serif); font-size: 36rpx; font-weight: 600; color: var(--ink); margin: 10rpx 0 12rpx; }
 .act-desc { font-size: 24rpx; color: var(--ink-2); line-height: 1.7; }
-.act-go { font-size: 24rpx; color: var(--ink); margin-top: 18rpx; letter-spacing: .04em; }
+.act-foot { display: flex; align-items: baseline; justify-content: space-between; margin-top: 18rpx; }
+.act-go { font-size: 24rpx; color: var(--ink); letter-spacing: .04em; }
+.act-date { font-size: 22rpx; letter-spacing: .06em; }

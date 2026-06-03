@@ -1,6 +1,6 @@
 <view class="share-wrap">
   <view class="card">
-    <view class="c-kicker">ANERYA · 情绪音乐</view>
+    <view class="c-kicker">ANERYA · 情绪民乐</view>
     <view class="c-name">{{persona.name}}</view>
     <view class="c-en">{{enUpper}}</view>
     <view class="c-img">曲线预设图位</view>

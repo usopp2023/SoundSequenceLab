@@ -12,6 +12,7 @@ App({
   onLaunch() {
     // 载入持久化的跨页状态
     this.globalData.store = store.load();
+    this.globalData.profile = this.globalData.store.profile || { nickname: '', avatarUrl: '' };
 
     // 登录拿 openid（dev 后端返回伪 openid；真实环境走 code2session）
     wx.login({

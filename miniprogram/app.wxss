@@ -43,6 +43,8 @@ view, text, scroll-view, button, input, textarea, image { box-sizing: border-box
 .btn::after { border: none; }
 .btn.active-press { transform: scale(.985); opacity: .9; }
 .btn.ghost { background-color: #fff; color: #1c1b1a; border: 2rpx solid var(--line); }
+.btn[disabled], .btn.disabled { background-color: #dcdad5; color: #fff; }
+.btn[disabled]::after { border: none; }
 .btnrow { display: flex; gap: 24rpx; }
 .btnrow .btn { flex: 1; }
 
@@ -70,3 +72,34 @@ view, text, scroll-view, button, input, textarea, image { box-sizing: border-box
 
 /* Tab 页底部留白，避免内容被固定 TabBar 遮挡 */
 .tabpage-pad { padding-bottom: calc(150rpx + env(safe-area-inset-bottom)); }
+
+/* —— 奖励：专属皮肤 + 勋章（me 与 act-mine 共用）—— */
+.rewards { display: flex; gap: 28rpx; }
+.reward { flex: 1; text-align: center; }
+.rw-thumb {
+  position: relative; aspect-ratio: 1 / 1; border-radius: 28rpx;
+  border: 1rpx solid var(--line); background: var(--fill);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.rw-card {
+  font-family: var(--serif); font-size: 30rpx; color: #fff; line-height: 1.3; letter-spacing: .1em; text-align: center;
+  width: 62%; aspect-ratio: 3 / 4; border-radius: 16rpx;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(150deg, #b5897f, #8f6f86);
+}
+.rw-medal {
+  width: 52%; aspect-ratio: 1 / 1; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #e8cf9a, #b58f4f);
+  color: #6b4f1f; font-family: var(--serif); font-size: 36rpx;
+  display: flex; align-items: center; justify-content: center;
+  border: 4rpx solid rgba(255, 255, 255, .6);
+}
+.rw-lock {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: rgba(245, 243, 239, .78); font-size: 44rpx;
+}
+.rewards.locked .rw-card, .rewards.locked .rw-medal { filter: grayscale(.7); opacity: .55; }
+.rw-name { font-size: 26rpx; color: var(--ink); margin-top: 16rpx; }
+.rw-sub { font-size: 22rpx; margin-top: 6rpx; line-height: 1.5; }
+.reward-tip { text-align: center; font-size: 24rpx; margin-top: 28rpx; letter-spacing: .02em; }
+.rg-act { font-size: 24rpx; letter-spacing: .06em; margin-bottom: 20rpx; }

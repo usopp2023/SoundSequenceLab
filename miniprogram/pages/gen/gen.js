@@ -2,44 +2,34 @@ const { request } = require('../../utils/request');
 const nav = require('../../utils/nav');
 
 const GEN_STEPS = ['正在听你说的话……', '读出你藏起来的情绪……', '正在谱一段曲子……'];
-
-// 后端不可用时的占位结果（黄昏独行者，与原型一致）
-const DEMO_RESULT = {
-  resultId: 'demo-fresh',
-  persona: { name: '黄昏独行者', en: 'The Dusk Wanderer' },
-  report: '你习惯在人群散去后才开口。情绪来得不急不缓，像黄昏的海——表面平静，底下有自己的潮汐。你把很多话留在了心里，但它们一直都在。',
-  dims: [
-    { left: '独处', right: '共处', value: 22, activeSide: 'left' },
-    { left: '涌动', right: '平静', value: 74, activeSide: 'right' },
-    { left: '直说', right: '含蓄', value: 80, activeSide: 'right' },
-    { left: '回望过去', right: '望向远方', value: 30, activeSide: 'left' }
-  ],
-  curveUrl: '',
-  music: { url: '', duration: 15 }
-};
+const POLL_TIMEOUT_MS = 15000; // 轮询最长 15s，超时进失败态
 
 Page({
-  data: { statusBar: 20, genText: GEN_STEPS[0] },
+  data: { statusBar: 20, genText: GEN_STEPS[0], failed: false },
 
   onLoad() {
     const info = wx.getWindowInfo ? wx.getWindowInfo() : wx.getSystemInfoSync();
     this.setData({ statusBar: info.statusBarHeight || 20 });
     this.steps = GEN_STEPS;
-    this.result = null;
-    this.tickerDone = false;
-    this.cancelled = false;
     this.start();
   },
 
   start() {
+    // 复位状态（支持「重新生成」）
+    this.result = null;
+    this.tickerDone = false;
+    this.cancelled = false;
+    this.deadline = Date.now() + POLL_TIMEOUT_MS;
+    this.setData({ failed: false });
     this.startTicker();
+
     const answers = getApp().globalData.quizAnswers || [];
     request('/api/generate', { method: 'POST', data: { answers, audioRefs: [] } })
       .then((res) => {
         if (res && res.jobId) this.poll(res.jobId);
-        else this.fallback();
+        else this.fail();
       })
-      .catch(() => this.fallback());
+      .catch(() => this.fail());
   },
 
   poll(jobId) {
@@ -51,18 +41,29 @@ Page({
         if (res && res.status === 'done' && res.result) {
           this.result = res.result;
           this.tryFinish();
+        } else if (Date.now() > this.deadline) {
+          this.fail(); // 超时
         } else {
           setTimeout(() => this.poll(jobId), 800);
         }
       })
-      .catch(() => this.fallback());
+      .catch(() => this.fail());
   },
 
-  // 后端不可用：等动画走完后用占位结果
-  fallback() {
-    if (this.result) return;
-    this.result = DEMO_RESULT;
-    this.tryFinish();
+  // 生成失败（网络错误 / 超时）→ 失败态，可重试
+  fail() {
+    if (this.cancelled || this.result) return;
+    if (this.ticker) { clearInterval(this.ticker); this.ticker = null; }
+    this.setData({ failed: true });
+  },
+
+  retryGen() { this.start(); },
+
+  // 「稍后再说」→ 回活动主页
+  later() {
+    this.cancelled = true;
+    if (this.ticker) { clearInterval(this.ticker); this.ticker = null; }
+    nav.switchActTab('pages/act-home/act-home');
   },
 
   startTicker() {

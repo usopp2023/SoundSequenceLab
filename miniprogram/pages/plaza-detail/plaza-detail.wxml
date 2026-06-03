@@ -2,13 +2,12 @@
   <view class="pad">
     <view class="r-head">
       <view class="r-tag-name">{{work.name}}</view>
-      <view class="r-tag-en">{{enUpper}}</view>
       <view class="r-source faint">{{work.by}}</view>
     </view>
 
     <view class="curve-img ph-box">
       <view class="ph-ico">〰️</view>
-      <view class="ph-label">TA 的情绪音乐曲线（预设配图位）</view>
+      <view class="ph-label">TA 的情绪民乐曲线（预设配图位）</view>
     </view>
 
     <view class="player {{playing ? 'playing' : ''}}" hover-class="player-press" bindtap="togglePlay">

@@ -2,9 +2,9 @@
   <!-- 用户身份（微信） -->
   <view class="me-head">
     <view class="me-id">
-      <view class="av"></view>
+      <view class="av"><image wx:if="{{avatarUrl}}" class="av-img" src="{{avatarUrl}}" mode="aspectFill" /></view>
       <view>
-        <view class="nm">微信用户</view>
+        <view class="nm">{{nickname}}</view>
         <view class="me-sub faint">声序实验室 · 已加入</view>
       </view>
     </view>
@@ -16,11 +16,34 @@
     <view class="act-row" hover-class="row-press" bindtap="enterAct">
       <view class="ar-thumb">〰️</view>
       <view class="ar-meta">
-        <view class="ar-title">阿那亚 · 情绪音乐</view>
+        <view class="ar-title">阿那亚 · 情绪民乐</view>
         <view class="ar-sub">我的人格：{{latestPersona}}</view>
       </view>
       <view class="ar-go">›</view>
     </view>
+  </view>
+
+  <!-- 我的奖励（跨活动总览）-->
+  <view class="me-sec">
+    <view class="sec-h">我的奖励</view>
+    <view class="rg-act faint">阿那亚 · 情绪民乐</view>
+    <view class="rewards {{rewardLocked ? 'locked' : ''}}">
+      <view class="reward">
+        <view class="rw-thumb">
+          <view class="rw-card"><text>声序</text><text>限定</text></view>
+          <view wx:if="{{rewardLocked}}" class="rw-lock">🔒</view>
+        </view>
+        <view class="rw-name">专属分享卡片皮肤</view>
+      </view>
+      <view class="reward">
+        <view class="rw-thumb">
+          <view class="rw-medal">徽</view>
+          <view wx:if="{{rewardLocked}}" class="rw-lock">🔒</view>
+        </view>
+        <view class="rw-name">阿那亚限定勋章</view>
+      </view>
+    </view>
+    <view wx:if="{{rewardLocked}}" class="reward-tip faint">解锁完整权益后可得</view>
   </view>
 
   <!-- 设置 -->

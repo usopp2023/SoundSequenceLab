@@ -2,7 +2,7 @@
   <!-- 海滩场景：按时段切换背景 t-dawn / t-day / t-dusk / t-night -->
   <view class="scene t-{{tod}}"></view>
 
-  <!-- 海面光球（漂浮的大家的情绪音乐）-->
+  <!-- 海面光球（漂浮的大家的情绪民乐）-->
   <view class="sea" id="sea">
     <view
       wx:for="{{bubbles}}"

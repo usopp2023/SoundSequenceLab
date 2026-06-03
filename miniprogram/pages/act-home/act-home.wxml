@@ -4,7 +4,7 @@
 
     <view class="intro-hero">
       <view class="intro-kicker">A N E R Y A · 声序实验室</view>
-      <view class="intro-title display">情绪音乐</view>
+      <view class="intro-title display">情绪民乐</view>
       <view class="intro-cover ph-box">
         活动主视觉位<view class="placeholder-note">TODO: 设计师出图</view>
       </view>
@@ -15,7 +15,7 @@
       <view class="intro-h4">怎么玩</view>
       <view class="step"><view class="sn">1</view><view class="st">回答三个简单的问题，约一分钟。</view></view>
       <view class="step"><view class="sn">2</view><view class="st">我们读出你的情绪，为你谱一段只属于你的曲子。</view></view>
-      <view class="step"><view class="sn">3</view><view class="st">得到你的情绪音乐曲线与人格标签，可分享、可与朋友比对。</view></view>
+      <view class="step"><view class="sn">3</view><view class="st">得到你的情绪民乐曲线与人格标签，可分享、可与朋友比对。</view></view>
     </view>
   </view>
 

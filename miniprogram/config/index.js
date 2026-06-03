@@ -11,10 +11,10 @@ const API_BASE_MAP = {
 module.exports = {
   ENV,
   API_BASE: API_BASE_MAP[ENV],
-  // 活动元信息（原型里写死的「阿那亚 · 情绪音乐」）
+  // 活动元信息（原型里写死的「阿那亚 · 情绪民乐」）
   ACTIVITY: {
     id: 'anerya-emotion-music',
-    name: '阿那亚 · 情绪音乐',
+    name: '阿那亚 · 情绪民乐',
     place: '阿那亚'
   }
 };

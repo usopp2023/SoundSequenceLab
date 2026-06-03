@@ -39,7 +39,7 @@ Page({
   onShareAppMessage() {
     const name = this.data.you.name;
     return {
-      title: `我是「${name}」，来测测你的情绪音乐，看看我们有多像`,
+      title: `我是「${name}」，来测测你的情绪民乐，看看我们有多像`,
       path: '/pages/sim-invite/sim-invite?from=' + encodeURIComponent(name)
     };
   }

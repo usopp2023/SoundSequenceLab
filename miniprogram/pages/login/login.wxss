@@ -1,0 +1,33 @@
+.login {
+  min-height: 100vh; background: #fff;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 0 68rpx;
+}
+.login-hero {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+}
+.login-hero .ambient { width: 180rpx; height: 180rpx; margin-bottom: 40rpx; }
+.brand-name { font-size: 56rpx; letter-spacing: .14em; color: var(--ink); }
+.brand-en { font-size: 22rpx; letter-spacing: .34em; color: var(--ink-3); margin-top: 16rpx; }
+.login-sub { font-family: var(--serif); font-size: 30rpx; line-height: 1.9; color: var(--ink-2); margin-top: 40rpx; }
+.br { display: block; height: 0; }
+
+.login-form { display: flex; flex-direction: column; align-items: center; gap: 32rpx; padding: 24rpx 0 48rpx; }
+.avatar-btn {
+  width: 160rpx; height: 160rpx; padding: 0; border-radius: 50%;
+  background: var(--fill); border: 1rpx solid var(--line); overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.avatar-btn::after { border: none; }
+.avatar-img { width: 160rpx; height: 160rpx; }
+.avatar-ph { color: #a8a5a0; font-size: 44rpx; display: flex; flex-direction: column; align-items: center; }
+.avatar-ph-tip { font-size: 20rpx; margin-top: 6rpx; letter-spacing: .08em; }
+.nick-row { width: 100%; }
+.nick-input {
+  width: 100%; text-align: center;
+  font-family: var(--serif); font-size: 34rpx; color: var(--ink);
+  padding: 24rpx; border-bottom: 1rpx solid var(--line);
+}
+
+.login-foot { width: 100%; padding-bottom: 80rpx; }
+.login-priv { text-align: center; font-size: 22rpx; margin-top: 24rpx; letter-spacing: .02em; line-height: 1.7; }

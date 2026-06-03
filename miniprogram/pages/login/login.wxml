@@ -1,0 +1,31 @@
+<view class="login" style="padding-top:{{statusBar}}px">
+  <view class="login-hero">
+    <view class="ambient"></view>
+    <view class="brand-name display">声序实验室</view>
+    <view class="brand-en">SOUND SEQUENCE LAB</view>
+    <view class="login-sub">登录后即可生成并保存<text class="br"></text>只属于你的情绪民乐</view>
+  </view>
+
+  <view class="login-form">
+    <!-- 头像（微信最新「头像昵称填写能力」）-->
+    <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image wx:if="{{avatarUrl}}" class="avatar-img" src="{{avatarUrl}}" mode="aspectFill" />
+      <view wx:else class="avatar-ph">＋<view class="avatar-ph-tip">选择头像</view></view>
+    </button>
+    <view class="nick-row">
+      <input
+        class="nick-input"
+        type="nickname"
+        placeholder="点这里填写昵称"
+        value="{{nickname}}"
+        bindinput="onNickInput"
+        bindblur="onNickInput"
+      />
+    </view>
+  </view>
+
+  <view class="login-foot">
+    <button class="btn {{canLogin ? '' : 'disabled'}}" disabled="{{!canLogin}}" hover-class="active-press" bindtap="doLogin">登录，开始体验</button>
+    <view class="login-priv faint">仅用于在活动里显示你的昵称头像，不会公开你的回答。</view>
+  </view>
+</view>

@@ -12,7 +12,7 @@
 
       <view class="about-h4">我们做过的</view>
       <view class="about-row" hover-class="row-press" bindtap="enterAct">
-        <text>阿那亚 · 情绪音乐</text><text class="faint">2026 ›</text>
+        <text>阿那亚 · 情绪民乐</text><text class="faint">2026 ›</text>
       </view>
       <view class="about-row faint">
         <text>更多空间，更多声音</text><text>敬请期待</text>

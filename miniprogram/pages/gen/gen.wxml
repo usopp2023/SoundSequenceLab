@@ -3,8 +3,21 @@
     <view class="gen-exit" hover-class="exit-press" bindtap="cancelGen">✕ 退出</view>
   </view>
   <view class="gen-body">
-    <view class="gen-orb"></view>
-    <view class="gen-text">{{genText}}</view>
-    <view class="gen-sub">为你谱一段曲子，请稍候</view>
+    <!-- 进行中 -->
+    <view wx:if="{{!failed}}" class="gen-loading">
+      <view class="gen-orb"></view>
+      <view class="gen-text">{{genText}}</view>
+      <view class="gen-sub">为你谱一段曲子，请稍候</view>
+    </view>
+    <!-- 失败态（超时 / 出错）-->
+    <view wx:else class="gen-fail">
+      <view class="gen-fail-ico">⚠</view>
+      <view class="gen-fail-title">这次没能谱成曲子</view>
+      <view class="gen-fail-sub">可能是网络或服务繁忙。<text class="br"></text>你的回答还在，可以再试一次。</view>
+      <view class="gen-fail-btns">
+        <button class="btn" hover-class="active-press" bindtap="retryGen">重新生成</button>
+        <button class="btn ghost" hover-class="active-press" bindtap="later">稍后再说</button>
+      </view>
+    </view>
   </view>
 </view>

@@ -20,8 +20,12 @@ Page({
     request('/api/redeem', { method: 'POST', data: { code: v } })
       .then((res) => {
         if (res && res.ok) unlock();
-        else wx.showToast({ title: (res && res.message) || '兑换码无效', icon: 'none' });
+        else wx.showToast({ title: (res && res.message) || '兑换码不正确，请检查后重试', icon: 'none' });
       })
-      .catch(() => unlock()); // 离线时也允许解锁（dev）
+      .catch(() => {
+        // 后端不可用时本地校验固定演示码
+        if (v.toLowerCase() === 'anysxzn2026') unlock();
+        else wx.showToast({ title: '兑换码不正确，请检查后重试', icon: 'none' });
+      });
   }
 });

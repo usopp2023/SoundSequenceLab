@@ -2,13 +2,12 @@
   <view class="pad">
     <view class="r-head">
       <view class="r-tag-name">{{result.persona.name}}</view>
-      <view class="r-tag-en">{{result.persona.en}}</view>
       <view class="r-source faint">{{sourceText}}</view>
     </view>
 
     <view class="curve-img ph-box">
       <view class="ph-ico">〰️</view>
-      <view class="ph-label">情绪音乐曲线（预设配图位）</view>
+      <view class="ph-label">情绪民乐曲线（预设配图位）</view>
       <view class="placeholder-note">TODO: 设计师统一出图</view>
     </view>
 

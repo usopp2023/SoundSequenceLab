@@ -2,8 +2,9 @@
   <view class="code-wrap">
     <view class="code-title">输入你的兑换码</view>
     <view class="code-sub">在阿那亚现场体验后获得的码，<text class="br"></text>可解锁专属身份与优惠。</view>
-    <input class="code-input" placeholder="– – – –" maxlength="8" value="{{code}}" bindinput="onInput" />
+    <input class="code-input" placeholder="输入兑换码" maxlength="16" value="{{code}}" bindinput="onInput" />
     <view class="gap"></view>
     <button class="btn" hover-class="active-press" bindtap="redeem">解锁</button>
+    <view class="code-demo faint">原型演示用兑换码：anysxzn2026</view>
   </view>
 </view>

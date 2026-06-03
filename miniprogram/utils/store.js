@@ -3,6 +3,7 @@
 const KEY = 'sxlab_state_v1';
 
 const defaultState = {
+  profile: { nickname: '', avatarUrl: '' }, // 微信昵称/头像（登录授权后填，#11）
   latestPersona: '黄昏独行者', // 最近一次人格名（相似度匹配以它为准，原型 #4）
   archive: [],                 // 我的情绪档案：[{name, en, when, resultId}]
   collected: [],               // 广场收藏：plaza 作品 id 列表

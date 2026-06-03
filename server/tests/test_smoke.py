@@ -146,10 +146,12 @@ def test_full_flow(client):
     assert sim["you"]["name"] == me_name
     assert sim["reading"]
 
-    # 9) redeem 成功 + 失败
-    rok = client.post("/api/redeem", json={"code": "ANY-CODE"})
+    # 9) redeem：正确码成功 / 错码失败 / 空码失败
+    rok = client.post("/api/redeem", json={"code": "anysxzn2026"})
     assert rok.status_code == 200 and rok.json()["ok"] is True
-    assert rok.json()["badge"] == "线下完整体验者"
+    assert rok.json()["unlocked"] is True
+    rwrong = client.post("/api/redeem", json={"code": "wrong-code"})
+    assert rwrong.json()["ok"] is False
     rfail = client.post("/api/redeem", json={"code": ""})
     assert rfail.json()["ok"] is False
 

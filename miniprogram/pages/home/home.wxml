@@ -14,9 +14,12 @@
       <view class="act-thumb">〰️<view class="placeholder-note">活动主视觉位</view></view>
       <view class="act-meta">
         <view class="act-status">进行中 · 阿那亚</view>
-        <view class="act-title">情绪音乐</view>
-        <view class="act-desc">回答三个问题，把说不出口的情绪，留成一段只属于你的曲子。</view>
-        <view class="act-go">进入活动 →</view>
+        <view class="act-title">情绪民乐</view>
+        <view class="act-desc">把说不出口的情绪，留成一段只属于你的曲子。</view>
+        <view class="act-foot">
+          <text class="act-go">进入活动 →</text>
+          <text class="act-date faint">2026.06.16 – 06.29</text>
+        </view>
       </view>
     </view>
 

@@ -23,7 +23,9 @@ Page({
     showResult: false,
     voiceText: '',
     // 打字态
-    typeText: ''
+    typeText: '',
+    // 「下一题」是否可点（当前题有输入才可，#1）
+    canNext: false
   },
 
   onLoad() {
@@ -51,6 +53,7 @@ Page({
               voiceText: (r && r.text) || '（这里是识别出来的文字，可以修改…）',
               voiceHint: '识别完成，可点麦克风重录'
             });
+            this.updateNextState();
           })
           .catch(() => {
             // 后端不可用时的占位识别结果（与原型一致）
@@ -59,6 +62,7 @@ Page({
               voiceText: '（这里是识别出来的文字，可以修改…）',
               voiceHint: '识别完成，可点麦克风重录'
             });
+            this.updateNextState();
           });
       }
     });
@@ -70,21 +74,33 @@ Page({
 
   renderQ() {
     const q = QUESTIONS[this.data.qi];
+    // 恢复该题之前的答案（#2 答案数据链）
+    const saved = (getApp().globalData.quizAnswers || [])[this.data.qi];
+    const savedText = saved && saved.text ? saved.text : '';
     this.setData({
       q,
       nextLabel: this.data.qi === QUESTIONS.length - 1 ? '完成，生成我的曲子' : '下一题',
-      // 重置每题输入态
       recording: false, showTimer: false, recSecLabel: '00:00',
-      voiceHint: '点击麦克风，说说就好', showResult: false, voiceText: '', typeText: ''
+      voiceHint: savedText ? '识别完成，可点麦克风重录' : '点击麦克风，说说就好',
+      showResult: !!savedText,    // 语音模式下回显识别区
+      voiceText: savedText,
+      typeText: savedText
     });
     this.recSec = 0;
+    this.updateNextState();
   },
 
-  useVoice() { this.setData({ mode: 'voice' }); },
-  useType() { this.stopRecIfAny(); this.setData({ mode: 'type' }); },
+  // 当前题是否有输入 → 控制「下一题」可点
+  updateNextState() {
+    const text = this.data.mode === 'voice' ? this.data.voiceText : this.data.typeText;
+    this.setData({ canNext: !!(text && text.trim()) });
+  },
 
-  onVoiceInput(e) { this.setData({ voiceText: e.detail.value }); },
-  onTypeInput(e) { this.setData({ typeText: e.detail.value }); },
+  useVoice() { this.setData({ mode: 'voice' }); this.updateNextState(); },
+  useType() { this.stopRecIfAny(); this.setData({ mode: 'type' }); this.updateNextState(); },
+
+  onVoiceInput(e) { const v = e.detail.value; this.setData({ voiceText: v, canNext: !!v.trim() }); },
+  onTypeInput(e) { const v = e.detail.value; this.setData({ typeText: v, canNext: !!v.trim() }); },
 
   toggleRec() {
     if (!this.data.recording) {
@@ -114,6 +130,7 @@ Page({
   quizNext() {
     this.stopRecIfAny();
     const text = this.data.mode === 'voice' ? this.data.voiceText : this.data.typeText;
+    if (!text || !text.trim()) return;   // 兜底：空答案不放行
     const answers = getApp().globalData.quizAnswers || [];
     answers[this.data.qi] = { q: this.data.qi, text: text || '' };
     getApp().globalData.quizAnswers = answers;

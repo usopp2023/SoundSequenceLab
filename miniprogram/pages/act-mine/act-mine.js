@@ -9,8 +9,9 @@ const DEMO_ARCHIVE = [
 
 Page({
   data: {
+    nickname: '微信用户',        // 登录授权后的微信昵称（#11）
+    avatarUrl: '',
     latestPersona: '黄昏独行者',
-    badge: '线上体验者',
     offlineUnlocked: false,
     archive: DEMO_ARCHIVE,
     collected: [],
@@ -23,10 +24,12 @@ Page({
       this.getTabBar().update();
     }
     const s = store.get();
+    const p = s.profile || {};
     this.setData({
       latestPersona: s.latestPersona,
       offlineUnlocked: s.offlineUnlocked,
-      badge: s.offlineUnlocked ? '线下完整体验者' : '线上体验者'
+      nickname: p.nickname || '微信用户',
+      avatarUrl: p.avatarUrl || ''
     });
     this.loadArchive();
     this.loadCollected();
@@ -54,6 +57,14 @@ Page({
   openCollected(e) {
     const id = e.currentTarget.dataset.id;
     wx.navigateTo({ url: '/pages/plaza-detail/plaza-detail?id=' + id });
+  },
+  // 取消收藏（#13）：再次点赞=取消，并从本地与列表移除
+  uncollect(e) {
+    const id = Number(e.currentTarget.dataset.id);
+    request('/api/plaza/' + id + '/like', { method: 'POST' }).catch(() => {});
+    const s = store.get();
+    store.update({ collected: (s.collected || []).filter((x) => x !== id) });
+    this.setData({ collected: this.data.collected.filter((it) => it.plazaId !== id) });
   },
   startQuiz() {
     getApp().globalData.quizAnswers = [];
