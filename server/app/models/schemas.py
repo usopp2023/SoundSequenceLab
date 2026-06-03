@@ -148,3 +148,18 @@ class RedeemResp(BaseModel):
     badge: Optional[str] = None
     perkCode: Optional[str] = None
     message: Optional[str] = None
+    claimed: Optional[bool] = None
+    resultId: Optional[str] = None
+    result: Optional[Result] = None
+
+
+# ---------- /api/kiosk/claim-code ----------
+class ClaimCodeReq(BaseModel):
+    resultId: str
+
+
+class ClaimCodeResp(BaseModel):
+    ok: bool
+    code: Optional[str] = None
+    qrUrl: Optional[str] = None      # 二维码地址（编码认领码，现场屏显示 + 小程序扫码认领）
+    message: Optional[str] = None

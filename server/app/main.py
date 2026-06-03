@@ -9,6 +9,7 @@ from . import config
 from .api import (
     routes_auth,
     routes_generate,
+    routes_kiosk,
     routes_me,
     routes_plaza,
     routes_upload,
@@ -43,6 +44,7 @@ app.include_router(routes_upload.router)
 app.include_router(routes_generate.router)
 app.include_router(routes_me.router)
 app.include_router(routes_plaza.router)
+app.include_router(routes_kiosk.router)
 
 
 @app.get("/")

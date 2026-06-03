@@ -4,8 +4,10 @@
   PlazaWork   广场作品（种子库）
   ResultRow   生成结果（用户历史档案）
   Like        用户对广场作品的收藏（openid + plaza_id）
+  ClaimCode   线下认领码（绑定某次结果到用户 openid）
 """
 import json
+import secrets
 from datetime import datetime, timezone
 from typing import List, Optional
 
@@ -47,6 +49,14 @@ class Like(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     openid: str = Field(index=True)
     plaza_id: int = Field(index=True)
+
+
+class ClaimCode(SQLModel, table=True):
+    code: str = Field(primary_key=True)              # 大写规范化
+    result_id: str = Field(index=True)
+    used: bool = False
+    used_by_openid: Optional[str] = None
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
 # ---------------- 引擎 / 会话 ----------------
@@ -161,3 +171,57 @@ def list_results(openid: str) -> List[ResultRow]:
 
 def result_row_to_dims(row: ResultRow) -> list:
     return json.loads(row.dims_json)
+
+
+# ---------------- 线下认领码 ----------------
+# 易读字符集：排除易混 O/0/I/1/L
+_CLAIM_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
+
+
+def _gen_code(length: int = 8) -> str:
+    return "".join(secrets.choice(_CLAIM_ALPHABET) for _ in range(length))
+
+
+def create_claim_code(result_id: str) -> str:
+    """为某次结果生成一个 8 位、易读、唯一的一次性认领码（大写）。"""
+    with get_session() as s:
+        while True:
+            code = _gen_code(8)
+            if s.get(ClaimCode, code) is None:
+                break
+        s.add(ClaimCode(code=code, result_id=result_id))
+        s.commit()
+        return code
+
+
+def get_claim_code(code: str) -> Optional[ClaimCode]:
+    """按大写规范化查认领码。"""
+    norm = (code or "").strip().upper()
+    if not norm:
+        return None
+    with get_session() as s:
+        return s.get(ClaimCode, norm)
+
+
+def mark_claim_used(code: str, openid: str) -> None:
+    """标记认领码已被某 openid 使用。"""
+    norm = (code or "").strip().upper()
+    with get_session() as s:
+        row = s.get(ClaimCode, norm)
+        if row:
+            row.used = True
+            row.used_by_openid = openid
+            s.add(row)
+            s.commit()
+
+
+def reassign_result(result_id: str, new_openid: str) -> bool:
+    """把结果归属改成 new_openid（使其进入该用户档案）。找不到返回 False。"""
+    with get_session() as s:
+        row = s.exec(select(ResultRow).where(ResultRow.result_id == result_id)).first()
+        if not row:
+            return False
+        row.openid = new_openid
+        s.add(row)
+        s.commit()
+        return True

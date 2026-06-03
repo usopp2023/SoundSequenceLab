@@ -31,13 +31,15 @@ Page({
 
   onLoad(query) {
     const mode = query.mode || 'fresh';
-    if (mode === 'fresh') {
+    if (mode === 'fresh' || mode === 'claimed') {
       const r = getApp().globalData.currentResult || DEMO_RESULT;
       this.applyResult(r, {
-        sourceText: '以下人格、曲线与音乐，都来自你刚才的回答',
+        sourceText: mode === 'claimed'
+          ? '已认领 · 来自你在阿那亚现场的体验'
+          : '以下人格、曲线与音乐，都来自你刚才的回答',
         showSaved: true, showFinish: true
       });
-      // 更新「最近人格」（相似度匹配以它为准），后端已自动存档
+      // 更新「最近人格」（相似度匹配以它为准）
       store.update({ latestPersona: r.persona.name });
     } else {
       // 历史档案

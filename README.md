@@ -16,8 +16,18 @@ miniprogram/               小程序前端
   pages/                   15 个页面
   assets/_gen-scene.js     广场海滩 4 时段背景生成脚本（产物 pages/act-plaza/scene.wxss 已提交）
 server/                    FastAPI 后端（见 server/README.md）
+kiosk/                     现场公用体验机（H5 单文件，接同一套后端）
+docs/                      未完成事项 / TODO
 原始资料/                   原始原型与落地文档
 ```
+
+## 线下体验机 + 认领（kiosk）
+
+阿那亚现场用一台公用平板跑 `kiosk/index.html`（H5）：答题 → 生成 → 结果 → 出**二维码 + 8 位认领码**。用户用**自己手机**的小程序进「我的活动 → 兑换码」，点「扫码认领」扫现场二维码（`wx.scanCode`），或手输码，把人格/曲子/权益**认领到本人账号**（一次性）。
+
+- 打开方式：浏览器开 `kiosk/index.html`，默认连 `http://localhost:8000`；指定后端用 `kiosk/index.html?api=http://你的后端`。
+- 后端接口：`POST /api/kiosk/claim-code` 出码（带 `qrUrl`）、`GET /api/kiosk/claim-qr?code=` 出二维码、`POST /api/redeem` 同时处理演示码与认领码。
+- 「微信原生冷扫码直接打开小程序」（小程序码）需正式 AppID，见 `docs/未完成事项.md`；现阶段是"小程序内扫码 / 手输码"，不需 AppID。
 
 ## 运行
 

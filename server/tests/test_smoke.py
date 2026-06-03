@@ -156,6 +156,74 @@ def test_full_flow(client):
     assert rfail.json()["ok"] is False
 
 
+def test_offline_claim_flow(client):
+    # 1) 现场设备（kioskdev）生成一条结果
+    payload = {
+        "answers": [
+            {"q": 0, "text": "我最想待在黄昏的海边。"},
+            {"q": 1, "text": "有件事放在心里没说。"},
+            {"q": 2, "text": "有句话一直想说却没说出口。"},
+        ],
+        "audioRefs": [],
+    }
+    kiosk_h = {"X-Openid": "kioskdev"}
+    rg = client.post("/api/generate", json=payload, headers=kiosk_h)
+    assert rg.status_code == 200
+    job_id = rg.json()["jobId"]
+
+    result_id = None
+    for _ in range(40):
+        rj = client.get(f"/api/jobs/{job_id}", headers=kiosk_h)
+        assert rj.status_code == 200
+        body = rj.json()
+        if body["status"] == "done":
+            result_id = body["result"]["resultId"]
+            break
+        time.sleep(0.1)
+    assert result_id is not None, "job never reached done"
+
+    # 2) 现场出认领码
+    rc = client.post("/api/kiosk/claim-code", json={"resultId": result_id})
+    assert rc.status_code == 200
+    cbody = rc.json()
+    assert cbody["ok"] is True
+    code = cbody["code"]
+    assert isinstance(code, str) and len(code) == 8
+    # 易读字符集：无 O/0/I/1/L
+    assert not (set(code) & set("O0I1L"))
+
+    # 3) 用户本人（userA）输码认领
+    user_h = {"X-Openid": "userA"}
+    rr = client.post("/api/redeem", json={"code": code}, headers=user_h)
+    assert rr.status_code == 200
+    rbody = rr.json()
+    assert rbody["ok"] is True
+    assert rbody["claimed"] is True
+    assert rbody["resultId"] == result_id
+    assert rbody["result"] is not None
+    _assert_valid_result(rbody["result"])
+
+    # 4) 认领后进入 userA 档案
+    ra = client.get("/api/me/archive", headers=user_h)
+    assert ra.status_code == 200
+    assert any(it["resultId"] == result_id for it in ra.json()["items"])
+
+    # 5) 同码再领 → 一次性，失败
+    rr2 = client.post("/api/redeem", json={"code": code}, headers=user_h)
+    assert rr2.status_code == 200
+    assert rr2.json()["ok"] is False
+
+    # 6) 演示码仍可用（claimed=false）
+    rdemo = client.post("/api/redeem", json={"code": "anysxzn2026"}, headers=user_h)
+    assert rdemo.status_code == 200
+    assert rdemo.json()["ok"] is True
+    assert rdemo.json()["claimed"] is False
+
+    # 不存在的 resultId 出码失败
+    rbad = client.post("/api/kiosk/claim-code", json={"resultId": "r_nope"})
+    assert rbad.json()["ok"] is False
+
+
 def test_similarity_by_name(client):
     r = client.post(
         "/api/similarity",

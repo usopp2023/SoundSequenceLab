@@ -1,9 +1,12 @@
 """登录 + 兑换码。"""
 import hashlib
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from ..models import schemas
+from ..store import db
+from .deps import get_openid
+from .routes_generate import _row_to_result
 
 router = APIRouter(prefix="/api", tags=["auth"])
 
@@ -26,11 +29,30 @@ FULL_CODE = "anysxzn2026"
 
 
 @router.post("/redeem", response_model=schemas.RedeemResp)
-def redeem(req: schemas.RedeemReq):
-    """校验固定演示码 anysxzn2026（忽略大小写）→ 解锁完整权益。"""
+def redeem(req: schemas.RedeemReq, openid: str = Depends(get_openid)):
+    """兑换码：演示码（解锁）或线下认领码（解锁 + 绑定结果到本人 openid）。"""
     code = (req.code or "").strip()
     if not code:
         return schemas.RedeemResp(ok=False, message="请输入兑换码")
-    if code.lower() != FULL_CODE:
-        return schemas.RedeemResp(ok=False, message="兑换码不正确，请检查后重试")
-    return schemas.RedeemResp(ok=True, unlocked=True)
+
+    # 演示码：保留原行为，仅多带 claimed=false
+    if code.lower() == FULL_CODE:
+        return schemas.RedeemResp(ok=True, unlocked=True, claimed=False)
+
+    # 线下认领码（忽略大小写）
+    claim = db.get_claim_code(code)
+    if claim:
+        if claim.used:
+            return schemas.RedeemResp(ok=False, message="这个码已经被领取过了")
+        db.reassign_result(claim.result_id, openid)
+        db.mark_claim_used(claim.code, openid)
+        row = db.get_result(claim.result_id)
+        return schemas.RedeemResp(
+            ok=True,
+            unlocked=True,
+            claimed=True,
+            resultId=claim.result_id,
+            result=_row_to_result(row) if row else None,
+        )
+
+    return schemas.RedeemResp(ok=False, message="兑换码不正确，请检查后重试")

@@ -9,4 +9,5 @@
   padding: 32rpx; border: 1rpx solid var(--line); border-radius: 28rpx;
 }
 .gap { height: 60rpx; }
+.scan-row { margin-top: 24rpx; }
 .code-demo { text-align: center; font-size: 22rpx; margin-top: 36rpx; letter-spacing: .04em; }

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>声序实验室 · 现场体验机</title>
+<style>
+  /* 现场公用体验机（平板全屏）。同后端：答题→分析→生成→结果→出认领码。
+     由用户用自己手机的小程序输码认领，把作品绑到本人。 */
+  :root{
+    --bg:#ffffff; --ink:#1c1b1a; --ink-2:#6b6864; --ink-3:#9a9792;
+    --line:#dcdad5; --line-2:#eeece8; --fill:#f0eeea; --terra:#b5613f;
+    --serif:"Songti SC","Noto Serif CJK SC","Source Han Serif SC",serif;
+    --sans:"PingFang SC","Noto Sans CJK SC","Source Han Sans SC",sans-serif;
+    --radius:22px; --shadow:0 1px 2px rgba(0,0,0,.04),0 12px 32px rgba(0,0,0,.06);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{font-family:var(--sans);color:var(--ink);
+    background:radial-gradient(120% 120% at 50% 0%,#f3f1ec 0%,#e7e4df 100%);}
+  .stage{max-width:760px;min-height:100vh;margin:0 auto;background:var(--bg);
+    display:flex;flex-direction:column;box-shadow:0 0 60px rgba(0,0,0,.06);}
+  .screen{flex:1;display:none;flex-direction:column;padding:64px 64px 56px;}
+  .screen.on{display:flex;}
+  .display{font-family:var(--serif);font-weight:600;}
+  .muted{color:var(--ink-2);} .faint{color:var(--ink-3);} .center{text-align:center;}
+  .grow{flex:1;}
+  .btn{appearance:none;border:none;cursor:pointer;font-family:var(--sans);width:100%;
+    padding:22px;border-radius:999px;font-size:22px;font-weight:500;letter-spacing:.06em;
+    background:#1c1b1a;color:#fff;transition:transform .12s,opacity .12s;}
+  .btn:active{transform:scale(.99);opacity:.92;}
+  .btn.ghost{background:#fff;color:#1c1b1a;border:1px solid var(--line);}
+  .btn:disabled{background:#dcdad5;cursor:default;}
+  .ambient{width:150px;height:150px;border-radius:50%;border:1px solid var(--line);position:relative;}
+  .ambient::after{content:"";position:absolute;inset:24px;border-radius:50%;border:1px solid var(--line-2);}
+
+  /* 欢迎 */
+  #welcome{align-items:center;justify-content:center;text-align:center;gap:8px;}
+  #welcome .kicker{font-size:16px;letter-spacing:.3em;color:var(--ink-3);margin:28px 0 18px;}
+  #welcome .title{font-size:46px;letter-spacing:.06em;}
+  #welcome .sub{font-family:var(--serif);font-size:20px;line-height:1.9;color:var(--ink-2);margin:22px 0 44px;}
+  #welcome .btn{max-width:360px;}
+
+  /* 答题 */
+  .progress{display:flex;gap:8px;margin-bottom:40px;}
+  .seg{flex:1;height:4px;border-radius:3px;background:var(--line);}
+  .seg.on{background:#1c1b1a;}
+  .q-index{font-size:16px;letter-spacing:.22em;color:var(--ink-3);margin-bottom:24px;}
+  .q-text{font-family:var(--serif);font-size:34px;line-height:1.6;font-weight:600;}
+  .q-hint{margin-top:18px;font-size:18px;color:var(--ink-2);line-height:1.8;}
+  .q-input{margin-top:36px;width:100%;flex:1;border:none;outline:none;resize:none;
+    font-family:var(--serif);font-size:24px;line-height:1.9;color:var(--ink);
+    border-bottom:1px solid var(--line);padding-bottom:16px;min-height:160px;}
+  .q-input::placeholder{color:#cfccc7;font-family:var(--sans);font-size:20px;}
+
+  /* 生成 */
+  #gen{align-items:center;justify-content:center;text-align:center;}
+  .orb{width:120px;height:120px;border-radius:50%;border:2px solid #1c1b1a;position:relative;
+    margin-bottom:48px;animation:breathe 2.6s ease-in-out infinite;}
+  .orb::before,.orb::after{content:"";position:absolute;inset:0;border-radius:50%;border:1px solid var(--line);}
+  .orb::before{animation:ripple 2.6s ease-out infinite;}
+  .orb::after{animation:ripple 2.6s ease-out infinite 1.3s;}
+  @keyframes breathe{0%,100%{transform:scale(1);}50%{transform:scale(.9);}}
+  @keyframes ripple{0%{transform:scale(1);opacity:.6;}100%{transform:scale(1.9);opacity:0;}}
+  .gen-text{font-family:var(--serif);font-size:24px;color:var(--ink);transition:opacity .4s;}
+  .gen-sub{margin-top:16px;font-size:15px;color:var(--ink-3);letter-spacing:.06em;}
+
+  /* 结果 */
+  .r-name{font-family:var(--serif);font-size:42px;font-weight:600;text-align:center;}
+  .r-src{text-align:center;font-size:14px;color:var(--ink-3);margin-top:10px;}
+  .player{display:flex;align-items:center;gap:16px;padding:18px 20px;border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);margin:28px 0;}
+  .play-btn{width:52px;height:52px;border-radius:50%;background:#1c1b1a;color:#fff;border:none;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;flex:none;font-size:18px;}
+  .play-meta{flex:1;} .play-meta .t1{font-size:16px;} .play-meta .t2{font-size:12px;color:var(--ink-3);margin-top:4px;}
+  .report h4{font-size:14px;color:var(--ink-3);letter-spacing:.16em;margin:0 0 12px;font-weight:500;}
+  .report p{font-family:var(--serif);font-size:18px;line-height:1.95;margin:0 0 22px;}
+  .dim{margin-bottom:20px;}
+  .dlabel{display:flex;justify-content:space-between;font-size:14px;color:var(--ink-2);margin-bottom:8px;}
+  .dlabel .active{color:var(--ink);font-weight:500;}
+  .dbar{height:5px;border-radius:3px;background:var(--line);position:relative;}
+  .dbar span{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:#1c1b1a;transform:translate(-50%,-50%);box-shadow:0 0 0 4px #fff;}
+
+  /* 认领码 */
+  .claim{margin-top:14px;border:1.5px dashed #cbc8c2;border-radius:var(--radius);background:var(--fill);
+    padding:26px;text-align:center;}
+  .claim-h{font-size:15px;color:var(--ink-2);letter-spacing:.04em;}
+  .claim-qr{display:none;width:208px;height:208px;margin:14px auto 4px;background:#fff;border-radius:10px;padding:8px;}
+  .claim-code{font-family:var(--serif);font-size:46px;font-weight:600;letter-spacing:.18em;
+    color:var(--ink);margin:10px 0 6px;}
+  .claim-tip{font-size:13px;color:var(--ink-3);line-height:1.7;margin-top:10px;}
+  .claim-tip b{color:var(--ink-2);font-weight:600;}
+
+  /* 失败 */
+  #fail{align-items:center;justify-content:center;text-align:center;}
+  .fail-ico{width:96px;height:96px;border-radius:50%;border:2px solid var(--line);display:flex;
+    align-items:center;justify-content:center;font-size:42px;color:var(--ink-3);margin-bottom:32px;}
+  .foot{padding-top:24px;}
+  .foot .btn+.btn{margin-top:14px;}
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- 欢迎 -->
+  <section class="screen on" id="welcome">
+    <div class="ambient"></div>
+    <div class="kicker">A N E R Y A · 声序实验室</div>
+    <div class="title display">情绪民乐</div>
+    <div class="sub">回答三个小问题，<br>把说不出口的情绪，谱成只属于你的一段民乐。</div>
+    <button class="btn" onclick="start()">开始体验</button>
+  </section>
+
+  <!-- 答题 -->
+  <section class="screen" id="quiz">
+    <div class="progress" id="progress"></div>
+    <div class="q-index" id="qIndex"></div>
+    <div class="q-text" id="qText"></div>
+    <div class="q-hint" id="qHint"></div>
+    <textarea class="q-input" id="qInput" oninput="onInput()"></textarea>
+    <div class="foot"><button class="btn" id="qNext" onclick="next()" disabled>下一题</button></div>
+  </section>
+
+  <!-- 生成 -->
+  <section class="screen" id="gen">
+    <div class="orb"></div>
+    <div class="gen-text" id="genText">正在听你说的话……</div>
+    <div class="gen-sub">为你谱一段曲子，请稍候</div>
+  </section>
+
+  <!-- 结果 -->
+  <section class="screen" id="result">
+    <div class="grow" style="overflow:auto;">
+      <div class="r-name" id="rName"></div>
+      <div class="r-src">以下人格、曲线与音乐，都来自你刚才的回答</div>
+
+      <div class="player">
+        <button class="play-btn" id="playBtn" onclick="togglePlay()">▶</button>
+        <div class="play-meta"><div class="t1">为你生成的曲子</div><div class="t2" id="playTime">0:00</div></div>
+      </div>
+
+      <div class="report">
+        <h4>关于你</h4>
+        <p id="rReport"></p>
+        <h4>你的四个维度</h4>
+        <div id="rDims"></div>
+      </div>
+
+      <div class="claim">
+        <div class="claim-h">把这份情绪民乐带回家</div>
+        <img class="claim-qr" id="claimQr" alt="认领二维码">
+        <div class="claim-code" id="claimCode">——</div>
+        <div class="claim-tip">打开 <b>声序实验室</b> 小程序 → 我的活动 → 兑换码 → <b>扫码认领</b>（扫上面的二维码），<br>或手动输入这串码。人格、曲子和专属权益就会认领到你自己的账号。<br><span class="faint">（正式上线后支持用微信直接冷扫码打开小程序）</span></div>
+      </div>
+    </div>
+    <div class="foot"><button class="btn ghost" onclick="reset()">完成，下一位</button></div>
+  </section>
+
+  <!-- 失败 -->
+  <section class="screen" id="fail">
+    <div class="fail-ico">⚠</div>
+    <div class="r-name" style="font-size:30px;">这次没能谱成曲子</div>
+    <div class="q-hint center" style="margin-top:16px;">可能是网络或服务繁忙，<br>你的回答还在，可以再试一次。</div>
+    <div class="foot" style="width:100%;max-width:360px;">
+      <button class="btn" onclick="runGen()">重新生成</button>
+      <button class="btn ghost" onclick="reset()">退出</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ===== 配置 ===== */
+const API_BASE = location.search.match(/[?&]api=([^&]+)/) ? decodeURIComponent(location.search.match(/[?&]api=([^&]+)/)[1]) : 'http://localhost:8000';
+const KIOSK_OPENID = 'kiosk'; // 现场设备的临时身份；结果先挂这里，认领后改绑到用户
+
+const QUESTIONS=[
+  {idx:'第 1 个问题 / 共 3 个',text:'此刻在阿那亚，你最想待着的是什么时间？',hint:'清晨、黄昏，还是深夜的海边？',ph:'随便写写，不用想太多……'},
+  {idx:'第 2 个问题 / 共 3 个',text:'最近有没有什么事，一直放在心里、没怎么跟人说？',hint:'不用具体，写个大概的感觉也行。',ph:'写下心里的那件事……'},
+  {idx:'第 3 个问题 / 共 3 个',text:'有没有一句话，你一直想对某个人说，却始终没说出口？',hint:'不用是什么大事——可能只是一个具体的瞬间，一个具体的人。',ph:'那句没说出口的话……'},
+];
+
+let qi=0, answers=[], curResult=null, audio=null;
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
+
+/* ===== HTTP ===== */
+async function api(path,{method='GET',body=null}={}){
+  const res=await fetch(API_BASE+path,{method,headers:{'content-type':'application/json','X-Openid':KIOSK_OPENID},body:body?JSON.stringify(body):null});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+
+/* ===== 答题 ===== */
+function start(){qi=0;answers=[];renderQ();show('quiz');}
+function renderQ(){
+  const q=QUESTIONS[qi];
+  document.getElementById('qIndex').textContent=q.idx;
+  document.getElementById('qText').textContent=q.text;
+  document.getElementById('qHint').textContent=q.hint;
+  const inp=document.getElementById('qInput');
+  inp.value=answers[qi]?.text||''; inp.placeholder=q.ph;
+  const p=document.getElementById('progress');p.innerHTML='';
+  QUESTIONS.forEach((_,i)=>{const s=document.createElement('div');s.className='seg'+(i<=qi?' on':'');p.appendChild(s);});
+  document.getElementById('qNext').textContent=qi===QUESTIONS.length-1?'完成，生成我的曲子':'下一题';
+  onInput();
+}
+function onInput(){
+  const v=document.getElementById('qInput').value.trim();
+  document.getElementById('qNext').disabled=!v;
+}
+function next(){
+  const v=document.getElementById('qInput').value.trim();
+  if(!v) return;
+  answers[qi]={q:qi,text:v};
+  if(qi<QUESTIONS.length-1){qi++;renderQ();}
+  else{show('gen');runGen();}
+}
+
+/* ===== 生成 ===== */
+const GEN_STEPS=['正在听你说的话……','读出你藏起来的情绪……','正在谱一段曲子……'];
+let ticker=null,tickerDone=false,deadline=0;
+function runGen(){
+  show('gen'); curResult=null; tickerDone=false; deadline=Date.now()+15000;
+  let step=0; const gt=document.getElementById('genText'); gt.textContent=GEN_STEPS[0]; gt.style.opacity=1;
+  clearInterval(ticker);
+  ticker=setInterval(()=>{step++;
+    if(step<GEN_STEPS.length){gt.style.opacity=0;setTimeout(()=>{gt.textContent=GEN_STEPS[step];gt.style.opacity=1;},300);}
+    else{clearInterval(ticker);ticker=null;tickerDone=true;tryFinish();}
+  },1500);
+  api('/api/generate',{method:'POST',body:{answers,audioRefs:[]}})
+    .then(r=>r.jobId?poll(r.jobId):fail())
+    .catch(fail);
+}
+function poll(jobId){
+  api('/api/jobs/'+jobId).then(r=>{
+    if(r&&r.status==='done'&&r.result){curResult=r.result;tryFinish();}
+    else if(Date.now()>deadline){fail();}
+    else setTimeout(()=>poll(jobId),800);
+  }).catch(fail);
+}
+function tryFinish(){if(curResult&&tickerDone)showResult();}
+function fail(){if(curResult)return;clearInterval(ticker);ticker=null;show('fail');}
+
+/* ===== 结果 + 认领码 ===== */
+function showResult(){
+  const r=curResult;
+  document.getElementById('rName').textContent=r.persona.name;
+  document.getElementById('rReport').textContent=r.report;
+  const dimsEl=document.getElementById('rDims');dimsEl.innerHTML='';
+  (r.dims||[]).forEach(d=>{
+    const el=document.createElement('div');el.className='dim';
+    el.innerHTML=`<div class="dlabel"><span class="${d.activeSide==='left'?'active':''}">${d.left}</span><span class="${d.activeSide==='right'?'active':''}">${d.right}</span></div><div class="dbar"><span style="left:${d.value}%"></span></div>`;
+    dimsEl.appendChild(el);
+  });
+  setupAudio(r.music);
+  document.getElementById('claimCode').textContent='——';
+  const qr=document.getElementById('claimQr'); qr.style.display='none'; qr.src='';
+  show('result');
+  // 向后端申请认领码 + 二维码
+  api('/api/kiosk/claim-code',{method:'POST',body:{resultId:r.resultId}})
+    .then(c=>{
+      if(c&&c.ok&&c.code){
+        document.getElementById('claimCode').textContent=c.code;
+        if(c.qrUrl){qr.src=(/^https?:/.test(c.qrUrl)?c.qrUrl:API_BASE+c.qrUrl);qr.style.display='block';}
+      }
+    })
+    .catch(()=>{document.getElementById('claimCode').textContent='（出码失败，请重试）';});
+}
+
+/* ===== 播放器 ===== */
+function setupAudio(music){
+  if(audio){audio.pause();audio=null;}
+  document.getElementById('playBtn').textContent='▶';
+  document.getElementById('playTime').textContent='0:'+String((music&&music.duration)||15).padStart(2,'0');
+  if(music&&music.url){
+    audio=new Audio(/^https?:/.test(music.url)?music.url:API_BASE+music.url);
+    audio.ontimeupdate=()=>{const c=Math.floor(audio.currentTime||0);document.getElementById('playTime').textContent='0:'+String(c).padStart(2,'0');};
+    audio.onended=()=>{document.getElementById('playBtn').textContent='▶';};
+  }
+}
+function togglePlay(){
+  if(!audio)return;
+  if(audio.paused){audio.play();document.getElementById('playBtn').textContent='❚❚';}
+  else{audio.pause();document.getElementById('playBtn').textContent='▶';}
+}
+
+/* ===== 重置给下一位 ===== */
+function reset(){
+  if(audio){audio.pause();audio=null;}
+  qi=0;answers=[];curResult=null;
+  document.getElementById('qInput').value='';
+  const qr=document.getElementById('claimQr'); qr.style.display='none'; qr.src='';
+  show('welcome');
+}
+</script>
+</body>
+</html>
