@@ -1,6 +1,7 @@
 .flow.gen { display: flex; flex-direction: column; min-height: 100vh; background: #fff; }
-.topbar { display: flex; align-items: center; padding: 0 32rpx; height: 88rpx; }
-.gen-exit { margin-left: auto; font-size: 26rpx; color: var(--ink-3); letter-spacing: .04em; padding: 12rpx 8rpx; }
+.topbar { display: flex; align-items: center; padding: 0 24rpx; height: 88rpx; }
+/* 靠左放，避开微信右上角胶囊按钮（··· ○） */
+.gen-exit { font-size: 26rpx; color: var(--ink-3); letter-spacing: .04em; padding: 12rpx 12rpx; }
 .exit-press { opacity: .6; }
 
 .gen-body { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 0 80rpx; }
