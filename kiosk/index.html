@@ -48,10 +48,34 @@
   .q-index{font-size:16px;letter-spacing:.22em;color:var(--ink-3);margin-bottom:24px;}
   .q-text{font-family:var(--serif);font-size:34px;line-height:1.6;font-weight:600;}
   .q-hint{margin-top:18px;font-size:18px;color:var(--ink-2);line-height:1.8;}
-  .q-input{margin-top:36px;width:100%;flex:1;border:none;outline:none;resize:none;
+  .q-input{margin-top:24px;width:100%;flex:1;border:none;outline:none;resize:none;
     font-family:var(--serif);font-size:24px;line-height:1.9;color:var(--ink);
     border-bottom:1px solid var(--line);padding-bottom:16px;min-height:160px;}
   .q-input::placeholder{color:#cfccc7;font-family:var(--sans);font-size:20px;}
+  .q-top{margin-bottom:10px;}
+  .q-back{display:inline-flex;align-items:center;font-size:16px;color:var(--ink-2);cursor:pointer;padding:6px 2px;}
+  /* 语音 */
+  .voice-area,.type-area{display:flex;flex-direction:column;flex:1;}
+  .voice-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px 0;}
+  .mic-btn{width:100px;height:100px;border-radius:50%;background:#1c1b1a;border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;transition:transform .12s;}
+  .mic-btn svg{width:40px;height:40px;}
+  .mic-btn:active{transform:scale(.94);}
+  .mic-btn.rec{background:var(--terra);animation:micpulse 1.4s ease-in-out infinite;}
+  @keyframes micpulse{0%,100%{box-shadow:0 0 0 0 rgba(181,97,63,.4);}50%{box-shadow:0 0 0 22px rgba(181,97,63,0);}}
+  .voice-waves{display:none;align-items:flex-end;gap:4px;height:36px;margin-top:26px;}
+  .voice-waves.on{display:flex;}
+  .voice-waves i{width:4px;background:var(--ink-3);border-radius:3px;height:30%;animation:vw .8s ease-in-out infinite;}
+  .voice-waves i:nth-child(2n){animation-delay:.15s;}.voice-waves i:nth-child(3n){animation-delay:.3s;}
+  .voice-waves i:nth-child(4n){animation-delay:.45s;}.voice-waves i:nth-child(5n){animation-delay:.2s;}
+  @keyframes vw{0%,100%{height:20%;}50%{height:100%;}}
+  .voice-hint{margin-top:26px;font-size:17px;color:var(--ink-2);}
+  .voice-timer{margin-top:12px;font-family:var(--serif);font-size:18px;color:var(--ink-3);letter-spacing:.1em;}
+  .voice-result{margin-top:8px;}
+  .vr-label{font-size:13px;color:var(--ink-3);margin-bottom:8px;}
+  .vr-text{width:100%;border:1px solid var(--line);border-radius:14px;outline:none;resize:none;
+    font-family:var(--serif);font-size:20px;line-height:1.8;color:var(--ink);padding:14px;min-height:96px;}
+  .switch-input{text-align:center;font-size:16px;color:var(--ink-3);padding:18px 0 4px;cursor:pointer;}
 
   /* 生成 */
   #gen{align-items:center;justify-content:center;text-align:center;}
@@ -111,13 +135,37 @@
     <button class="btn" onclick="start()">开始体验</button>
   </section>
 
-  <!-- 答题 -->
+  <!-- 答题（语音优先 / 打字兜底，与小程序一致）-->
   <section class="screen" id="quiz">
+    <div class="q-top"><div class="q-back" id="qBack" onclick="back()">‹ 返回</div></div>
     <div class="progress" id="progress"></div>
     <div class="q-index" id="qIndex"></div>
     <div class="q-text" id="qText"></div>
     <div class="q-hint" id="qHint"></div>
-    <textarea class="q-input" id="qInput" oninput="onInput()"></textarea>
+
+    <!-- 语音输入（默认）-->
+    <div class="voice-area" id="voiceArea">
+      <div class="voice-stage">
+        <button class="mic-btn" id="micBtn" onclick="toggleRec()" aria-label="录音">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+        </button>
+        <div class="voice-waves" id="voiceWaves"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="voice-hint" id="voiceHint">点击麦克风，说说就好</div>
+        <div class="voice-timer" id="voiceTimer" style="display:none;">00:00</div>
+      </div>
+      <div class="voice-result" id="voiceResult" style="display:none;">
+        <div class="vr-label">识别到（可修改）</div>
+        <textarea class="vr-text" id="vrText" oninput="onInput()"></textarea>
+      </div>
+      <div class="switch-input" onclick="useType()">不方便说话？改用打字 →</div>
+    </div>
+
+    <!-- 打字输入（备选）-->
+    <div class="type-area" id="typeArea" style="display:none;">
+      <textarea class="q-input" id="qInput" oninput="onInput()"></textarea>
+      <div class="switch-input" onclick="useVoice()">← 改用语音</div>
+    </div>
+
     <div class="foot"><button class="btn" id="qNext" onclick="next()" disabled>下一题</button></div>
   </section>
 
@@ -181,8 +229,10 @@ const QUESTIONS=[
 ];
 
 let qi=0, answers=[], curResult=null, audio=null;
+let mode='voice', recording=false, mediaRecorder=null, chunks=[], recTimer=null, recSec=0, recStream=null;
 
 function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');}
+function $(id){return document.getElementById(id);}
 
 /* ===== HTTP ===== */
 async function api(path,{method='GET',body=null}={}){
@@ -191,28 +241,102 @@ async function api(path,{method='GET',body=null}={}){
   return res.json();
 }
 
-/* ===== 答题 ===== */
-function start(){qi=0;answers=[];renderQ();show('quiz');}
+/* ===== 答题（与小程序一致：语音优先 / 打字兜底）===== */
+function start(){qi=0;answers=[];mode='voice';renderQ();show('quiz');}
+
 function renderQ(){
   const q=QUESTIONS[qi];
-  document.getElementById('qIndex').textContent=q.idx;
-  document.getElementById('qText').textContent=q.text;
-  document.getElementById('qHint').textContent=q.hint;
-  const inp=document.getElementById('qInput');
-  inp.value=answers[qi]?.text||''; inp.placeholder=q.ph;
-  const p=document.getElementById('progress');p.innerHTML='';
+  $('qIndex').textContent=q.idx;
+  $('qText').textContent=q.text;
+  $('qHint').textContent=q.hint;
+  const saved=answers[qi]?.text||'';
+  $('qInput').value=saved; $('qInput').placeholder=q.ph;
+  $('vrText').value=saved;
+  resetVoiceUI(!!saved);
+  applyMode();
+  $('qBack').textContent = qi>0 ? '‹ 上一题' : '‹ 返回';
+  const p=$('progress');p.innerHTML='';
   QUESTIONS.forEach((_,i)=>{const s=document.createElement('div');s.className='seg'+(i<=qi?' on':'');p.appendChild(s);});
-  document.getElementById('qNext').textContent=qi===QUESTIONS.length-1?'完成，生成我的曲子':'下一题';
-  onInput();
+  $('qNext').textContent=qi===QUESTIONS.length-1?'完成，生成我的曲子':'下一题';
+  updateNext();
 }
-function onInput(){
-  const v=document.getElementById('qInput').value.trim();
-  document.getElementById('qNext').disabled=!v;
+
+function applyMode(){
+  $('voiceArea').style.display = mode==='voice' ? 'flex' : 'none';
+  $('typeArea').style.display = mode==='type' ? 'flex' : 'none';
+}
+function resetVoiceUI(hasSaved){
+  stopRecIfAny();
+  $('micBtn').classList.remove('rec');
+  $('voiceWaves').classList.remove('on');
+  $('voiceTimer').style.display='none'; $('voiceTimer').textContent='00:00';
+  $('voiceHint').textContent = hasSaved ? '识别完成，可点麦克风重录' : '点击麦克风，说说就好';
+  $('voiceResult').style.display = hasSaved ? 'block' : 'none';
+}
+
+function currentText(){
+  return (mode==='voice' ? $('vrText').value : $('qInput').value).trim();
+}
+function onInput(){updateNext();}
+function updateNext(){$('qNext').disabled = !currentText();}
+
+function useVoice(){mode='voice';applyMode();updateNext();}
+function useType(){stopRecIfAny();mode='type';applyMode();updateNext();}
+
+/* 录音：浏览器 MediaRecorder → 上传 /api/upload → 占位识别文字（对齐小程序）。
+   注意：getUserMedia 需 https 或 localhost；不可用时自动切打字。 */
+async function toggleRec(){
+  if(recording){ stopRecIfAny(); return; }
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){ alert('此设备/页面不支持录音（需 https 或 localhost），请改用打字'); useType(); return; }
+  try{ recStream=await navigator.mediaDevices.getUserMedia({audio:true}); }
+  catch(e){ alert('没拿到麦克风权限，请改用打字'); useType(); return; }
+  chunks=[]; mediaRecorder=new MediaRecorder(recStream);
+  mediaRecorder.ondataavailable=e=>{if(e.data&&e.data.size>0)chunks.push(e.data);};
+  mediaRecorder.onstop=onRecStop;
+  mediaRecorder.start();
+  recording=true; recSec=0;
+  $('micBtn').classList.add('rec');
+  $('voiceWaves').classList.add('on');
+  $('voiceHint').textContent='正在聆听…再次点击结束';
+  const t=$('voiceTimer'); t.style.display='block'; t.textContent='00:00';
+  recTimer=setInterval(()=>{recSec++;const m=String(Math.floor(recSec/60)).padStart(2,'0'),s=String(recSec%60).padStart(2,'0');t.textContent=m+':'+s;},1000);
+}
+function stopRecIfAny(){
+  if(recTimer){clearInterval(recTimer);recTimer=null;}
+  if(recording&&mediaRecorder&&mediaRecorder.state!=='inactive'){ try{mediaRecorder.stop();}catch(e){} }
+  recording=false;
+  $('micBtn').classList.remove('rec');
+  $('voiceWaves').classList.remove('on');
+}
+async function onRecStop(){
+  if(recStream){recStream.getTracks().forEach(t=>t.stop());recStream=null;}
+  $('voiceHint').textContent='识别中…';
+  const blob=new Blob(chunks,{type:(chunks[0]&&chunks[0].type)||'audio/webm'});
+  try{
+    const fd=new FormData();
+    fd.append('file',blob,'clip.webm');
+    fd.append('openid',KIOSK_OPENID);
+    const res=await fetch(API_BASE+'/api/upload',{method:'POST',headers:{'X-Openid':KIOSK_OPENID},body:fd});
+    const data=await res.json();
+    $('vrText').value=(data&&data.text)||'（这里是识别出来的文字，可以修改…）';
+  }catch(e){
+    $('vrText').value='（这里是识别出来的文字，可以修改…）';
+  }
+  $('voiceResult').style.display='block';
+  $('voiceHint').textContent='识别完成，可点麦克风重录';
+  updateNext();
+}
+
+function back(){
+  stopRecIfAny();
+  if(qi>0){ const t=currentText(); if(t) answers[qi]={q:qi,text:t}; qi--; renderQ(); }
+  else { reset(); } // 第一题再返回 = 回欢迎
 }
 function next(){
-  const v=document.getElementById('qInput').value.trim();
-  if(!v) return;
-  answers[qi]={q:qi,text:v};
+  stopRecIfAny();
+  const t=currentText();
+  if(!t) return;
+  answers[qi]={q:qi,text:t};
   if(qi<QUESTIONS.length-1){qi++;renderQ();}
   else{show('gen');runGen();}
 }
@@ -288,9 +412,10 @@ function togglePlay(){
 /* ===== 重置给下一位 ===== */
 function reset(){
   if(audio){audio.pause();audio=null;}
-  qi=0;answers=[];curResult=null;
-  document.getElementById('qInput').value='';
-  const qr=document.getElementById('claimQr'); qr.style.display='none'; qr.src='';
+  stopRecIfAny();
+  qi=0;answers=[];curResult=null;mode='voice';
+  $('qInput').value=''; $('vrText').value='';
+  const qr=$('claimQr'); qr.style.display='none'; qr.src='';
   show('welcome');
 }
 </script>

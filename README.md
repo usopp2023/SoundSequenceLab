@@ -25,7 +25,9 @@ docs/                      未完成事项 / TODO
 
 阿那亚现场用一台公用平板跑 `kiosk/index.html`（H5）：答题 → 生成 → 结果 → 出**二维码 + 8 位认领码**。用户用**自己手机**的小程序进「我的活动 → 兑换码」，点「扫码认领」扫现场二维码（`wx.scanCode`），或手输码，把人格/曲子/权益**认领到本人账号**（一次性）。
 
+- 答题流程与小程序一致：**语音优先**（浏览器 `MediaRecorder` 录音 → `/api/upload` 占位识别）+ **打字兜底**，支持上一题、答案恢复、空输入禁用下一题。
 - 打开方式：浏览器开 `kiosk/index.html`，默认连 `http://localhost:8000`；指定后端用 `kiosk/index.html?api=http://你的后端`。
+- ⚠️ 浏览器录音需 **https 或 localhost**（安全上下文）；现场若用普通 http 访问，录音会自动降级为打字（小程序端用微信原生录音无此限制）。
 - 后端接口：`POST /api/kiosk/claim-code` 出码（带 `qrUrl`）、`GET /api/kiosk/claim-qr?code=` 出二维码、`POST /api/redeem` 同时处理演示码与认领码。
 - 「微信原生冷扫码直接打开小程序」（小程序码）需正式 AppID，见 `docs/未完成事项.md`；现阶段是"小程序内扫码 / 手输码"，不需 AppID。
 
