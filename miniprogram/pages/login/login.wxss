@@ -4,13 +4,12 @@
   padding: 0 68rpx;
 }
 .login-hero {
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  padding: 60rpx 0 16rpx;
 }
-.login-hero .ambient { width: 180rpx; height: 180rpx; margin-bottom: 40rpx; }
-.brand-name { font-size: 56rpx; letter-spacing: .14em; color: var(--ink); }
-.brand-en { font-size: 22rpx; letter-spacing: .34em; color: var(--ink-3); margin-top: 16rpx; }
-.login-sub { font-family: var(--serif); font-size: 30rpx; line-height: 1.9; color: var(--ink-2); margin-top: 40rpx; }
-.br { display: block; height: 0; }
+.login-hero .ambient { width: 150rpx; height: 150rpx; margin-bottom: 36rpx; }
+.login-title { font-size: 44rpx; letter-spacing: .04em; color: var(--ink); }
+.login-sub { font-size: 26rpx; line-height: 1.8; color: var(--ink-2); margin-top: 20rpx; }
 
 .login-form { display: flex; flex-direction: column; align-items: center; gap: 32rpx; padding: 24rpx 0 48rpx; }
 .avatar-btn {

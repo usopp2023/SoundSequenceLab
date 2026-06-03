@@ -1,10 +1,11 @@
 <view class="tabpage-pad">
   <!-- 活动内身份 -->
   <view class="me-head">
-    <view class="me-id">
+    <view class="me-id" hover-class="row-press" bindtap="editProfile">
       <view class="av"><image wx:if="{{avatarUrl}}" class="av-img" src="{{avatarUrl}}" mode="aspectFill" /></view>
       <view>
         <view class="nm">{{nickname}}</view>
+        <view wx:if="{{!profileSet}}" class="me-sub faint">点这里设置头像昵称 ›</view>
       </view>
     </view>
   </view>

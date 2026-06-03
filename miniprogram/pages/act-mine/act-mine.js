@@ -9,8 +9,9 @@ const DEMO_ARCHIVE = [
 
 Page({
   data: {
-    nickname: '微信用户',        // 登录授权后的微信昵称（#11）
+    nickname: '微信用户',        // 微信昵称（按需设置，#11）
     avatarUrl: '',
+    profileSet: false,
     latestPersona: '黄昏独行者',
     offlineUnlocked: false,
     archive: DEMO_ARCHIVE,
@@ -29,10 +30,15 @@ Page({
       latestPersona: s.latestPersona,
       offlineUnlocked: s.offlineUnlocked,
       nickname: p.nickname || '微信用户',
-      avatarUrl: p.avatarUrl || ''
+      avatarUrl: p.avatarUrl || '',
+      profileSet: !!p.nickname
     });
     this.loadArchive();
     this.loadCollected();
+  },
+  // 按需设置头像昵称
+  editProfile() {
+    wx.navigateTo({ url: '/pages/login/login' });
   },
 
   loadArchive() {

@@ -1,6 +1,5 @@
 {
   "pages": [
-    "pages/login/login",
     "pages/home/home",
     "pages/me/me",
     "pages/act-home/act-home",
@@ -15,7 +14,8 @@
     "pages/sim/sim",
     "pages/sim-invite/sim-invite",
     "pages/plaza-detail/plaza-detail",
-    "pages/code/code"
+    "pages/code/code",
+    "pages/login/login"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ffffff",

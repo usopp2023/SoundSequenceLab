@@ -1,11 +1,11 @@
 <view class="tabpage-pad">
   <!-- 用户身份（微信） -->
   <view class="me-head">
-    <view class="me-id">
+    <view class="me-id" hover-class="row-press" bindtap="editProfile">
       <view class="av"><image wx:if="{{avatarUrl}}" class="av-img" src="{{avatarUrl}}" mode="aspectFill" /></view>
       <view>
         <view class="nm">{{nickname}}</view>
-        <view class="me-sub faint">声序实验室 · 已加入</view>
+        <view class="me-sub faint">{{profileSet ? '声序实验室 · 已加入' : '点这里设置头像昵称 ›'}}</view>
       </view>
     </view>
   </view>
