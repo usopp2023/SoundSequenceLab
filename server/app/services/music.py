@@ -45,17 +45,23 @@ class PlaceholderMusic(MusicService):
 
 
 class SunoMusic(MusicService):
-    """调 suno-api 生成民乐 instrumental → 轮询 → 下载转存。失败抛异常（上层兜底）。"""
+    """通过 suno-api 的浏览器生成（/api/ui_generate）触发出曲，再轮询 /api/get
+    取回新出现的那首，最后经代理从 Suno CDN 下载转存到 static/generated。
+    适配国内 + 当前 Suno UI（hCaptcha 无感、无头被拦）。失败抛异常（上层兜底）。
+    需 suno-api 跑在 SUNO_API_BASE（BROWSER_HEADLESS=false），SUNO_PROXY 可达。
+    """
 
-    def __init__(self, api_base: str, poll_timeout: int = 180, poll_interval: float = 5.0):
+    def __init__(self, api_base: str, proxy: str = "", poll_timeout: int = 360, poll_interval: float = 10.0):
         self.base = api_base.rstrip("/")
+        self.proxy = proxy or None
         self.poll_timeout = poll_timeout
         self.poll_interval = poll_interval
 
     def generate(self, analysis: AnalysisResult) -> MusicResult:
-        prompt = self._build_prompt(analysis)
-        ids = self._start(prompt)
-        clip = self._wait(ids)
+        desc = self._build_prompt(analysis)
+        before = self._existing_ids()
+        ids = self._trigger(desc)                 # ui_generate（慢，~1-2min）
+        clip = self._wait_clip(before, ids)       # 轮询 /api/get 取回新曲
         path = self._download(clip)
         dur = int(round(float(clip.get("duration") or 0))) or 30
         return MusicResult(url=config.static_url(f"generated/{path.name}"), duration=dur)
@@ -65,36 +71,62 @@ class SunoMusic(MusicService):
         params = raw.get("bucket_params") or {}
         return params.get("suno_tags") or "Chinese folk instrumental, solo guzheng, pentatonic, no vocals"
 
-    def _start(self, prompt: str) -> List[str]:
+    def _get_clips(self) -> List[dict]:
+        # /api/get 经代理调 Suno，时通时断；重试几次，拿到合法 JSON 列表才算
         import httpx
-        with httpx.Client(timeout=60) as c:
-            r = c.post(f"{self.base}/api/generate",
-                       json={"prompt": prompt, "make_instrumental": True, "wait_audio": False})
-            r.raise_for_status()
-            clips = r.json()
-        ids = [cl.get("id") for cl in clips if cl.get("id")]
-        if not ids:
-            raise RuntimeError("suno-api 未返回 clip id")
-        return ids
-
-    def _wait(self, ids: List[str]) -> dict:
-        import httpx
-        deadline = time.monotonic() + self.poll_timeout
-        idstr = ",".join(ids)
-        with httpx.Client(timeout=30) as c:
-            while time.monotonic() < deadline:
-                r = c.get(f"{self.base}/api/get", params={"ids": idstr})
+        for _ in range(3):
+            try:
+                # trust_env=False：不走系统/Clash 代理，直连本地 suno-api（否则 localhost 被代理→502）
+                with httpx.Client(timeout=40, trust_env=False) as c:
+                    r = c.get(f"{self.base}/api/get")
                 if r.status_code == 200:
-                    for clip in r.json():
-                        if clip.get("audio_url") and clip.get("status") in ("streaming", "complete"):
-                            return clip
-                time.sleep(self.poll_interval)
-        raise TimeoutError("Suno 出曲超时")
+                    data = r.json()
+                    if isinstance(data, list):
+                        return data
+            except Exception:
+                pass
+            time.sleep(2)
+        return []
+
+    def _existing_ids(self) -> set:
+        try:
+            return {c.get("id") for c in self._get_clips()}
+        except Exception:
+            return set()
+
+    def _trigger(self, desc: str) -> List[str]:
+        import httpx
+        try:
+            with httpx.Client(timeout=200, trust_env=False) as c:
+                r = c.post(f"{self.base}/api/ui_generate", json={"description": desc})
+                r.raise_for_status()
+                return [i for i in (r.json().get("ids") or []) if i]
+        except Exception as e:
+            # ui_generate 慢/超时是常态，生成多半仍在进行，靠 /api/get 取回
+            print(f"[music] ui_generate 触发返回异常（继续轮询取回）：{e!r}")
+            return []
+
+    def _wait_clip(self, before: set, ids: List[str]) -> dict:
+        deadline = time.monotonic() + self.poll_timeout
+        while time.monotonic() < deadline:
+            try:
+                clips = self._get_clips()
+            except Exception:
+                clips = []
+            # 候选：ui_generate 明确返回的 ids，或 /api/get 里新冒出来的 id
+            for c in clips:
+                cid = c.get("id")
+                is_new = (cid in ids) or (cid not in before)
+                if is_new and c.get("audio_url") and c.get("status") in ("streaming", "complete"):
+                    return c
+            time.sleep(self.poll_interval)
+        raise TimeoutError("Suno 出曲超时（ui_generate 轮询）")
 
     def _download(self, clip: dict) -> Path:
         import httpx
         path = config.GENERATED_DIR / f"{clip.get('id', 'track')}.mp3"
-        with httpx.Client(timeout=120) as c:
+        # 显式走代理下载 Suno CDN；trust_env=False 避免再叠加系统代理
+        with httpx.Client(timeout=180, proxy=self.proxy, trust_env=False) as c:
             r = c.get(clip["audio_url"])
             r.raise_for_status()
             path.write_bytes(r.content)
@@ -111,8 +143,8 @@ def _wav_seconds(path: Path) -> int:
 
 def _make_service() -> MusicService:
     if config.SUNO_ENABLED:
-        print(f"[music] 使用 Suno 真实生成：{config.SUNO_API_BASE}")
-        return SunoMusic(config.SUNO_API_BASE)
+        print(f"[music] 使用 Suno 真实生成：{config.SUNO_API_BASE}（proxy={config.SUNO_PROXY}）")
+        return SunoMusic(config.SUNO_API_BASE, config.SUNO_PROXY)
     return PlaceholderMusic()
 
 

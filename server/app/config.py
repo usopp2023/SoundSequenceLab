@@ -38,6 +38,8 @@ SUNO_API_KEY = os.getenv("SUNO_API_KEY", "")
 # suno-api（gcui-art）本地服务地址；SUNO_ENABLED=1 时才真正调 Suno，否则音乐走兜底
 SUNO_API_BASE = os.getenv("SUNO_API_BASE") or "http://localhost:3000"
 SUNO_ENABLED = (os.getenv("SUNO_ENABLED") or "").strip() in ("1", "true", "True", "yes")
+# 下载 Suno CDN（cdn1.suno.ai，海外）用的代理；国内必需。留空=直连
+SUNO_PROXY = os.getenv("SUNO_PROXY") or "http://127.0.0.1:7897"
 
 
 def static_url(relative: str) -> str:

@@ -78,7 +78,7 @@ Page({
   startMusicPoll(resultId) {
     if (!resultId || resultId.indexOf('demo') === 0) return;
     this.stopMusicPoll();
-    this.musicDeadline = Date.now() + 200000; // 最多等 ~3min
+    this.musicDeadline = Date.now() + 420000; // 最多等 ~7min（Suno 出曲慢）
     const tick = () => {
       request('/api/results/' + resultId)
         .then((r) => {

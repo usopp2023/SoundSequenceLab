@@ -17,9 +17,16 @@ miniprogram/               小程序前端
   assets/_gen-scene.js     广场海滩 4 时段背景生成脚本（产物 pages/act-plaza/scene.wxss 已提交）
 server/                    FastAPI 后端（见 server/README.md）
 kiosk/                     现场公用体验机（H5 单文件，接同一套后端）
-docs/                      未完成事项 / TODO
+docs/                      产品文档 / Suno接入说明 / 方案选型 / 未完成事项
 原始资料/                   原始原型与落地文档
 ```
+
+## 情绪分析 + 音乐生成（已接真实）
+
+- **情绪分析**：阶跃星辰（`server/app/services/analysis.py`，9 桶情绪本体在 `buckets.py`）。配 `ANALYSIS_API_KEY` 即启用，无 key 回退占位。
+- **音乐生成**：真 Suno 民乐——自建 `suno-api`（有头浏览器生成）+ 代理下载转存。`SUNO_ENABLED=1` 启用。**完整搭建 / 排障 / 局限见 `docs/Suno接入说明.md`**。
+- 生成异步：答题 → 分析秒出人格/四维 → 音乐后台出曲（~2-3min）→ 结果页「生成中→自动点亮」。
+- 密钥/代理放 `server/.env`（gitignore）；suno-api 第三方服务不入库。
 
 ## 线下体验机 + 认领（kiosk）
 

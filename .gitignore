@@ -30,3 +30,8 @@ node_modules/
 
 # 第三方 Suno 代理服务（独立项目，不入库）
 /suno-api/
+
+# 本地下载的音乐样本（大文件，不入库）
+/下载音乐/
+server/app/static/generated/*
+!server/app/static/generated/.gitkeep
