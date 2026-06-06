@@ -45,6 +45,9 @@ class PlaceholderAnalysis(AnalysisService):
         )
 
 
+# 9 桶风格锚点（把现有 suno_tags 当成给 LLM 的「风格参考」，由 LLM 按情绪个性化）
+_STYLE_ANCHORS = "\n".join(f"  - {b['key']}：{b['suno_tags']}" for b in buckets.BUCKETS)
+
 _SYSTEM_PROMPT = (
     "你是「声序实验室·情绪民乐」的情绪分析引擎。用户回答了三个关于此刻心境的问题，"
     "请基于回答做情绪语义分析，并严格只返回一个 JSON 对象（不要任何多余文字、不要代码块）。\n\n"
@@ -61,8 +64,21 @@ _SYSTEM_PROMPT = (
     '  "keywords": ["", ""],\n'
     '  "persona": {"name": "中文人格名(2-6字, 诗意, 如 黄昏独行者)", "en": "English Name"},\n'
     '  "report": "一段第二人称的『关于你』解读, 60-120字, 温柔克制",\n'
-    '  "dims": {"独处_共处":0,"涌动_平静":0,"直说_含蓄":0,"回望过去_望向远方":0}\n'
-    "}"
+    '  "dims": {"独处_共处":0,"涌动_平静":0,"直说_含蓄":0,"回望过去_望向远方":0},\n'
+    '  "music_prompt": "英文；给音乐生成模型的提示词，写法见下方要求"\n'
+    "}\n\n"
+    "【music_prompt 怎么写】这是最关键的一项，要真正『根据这个人的情绪』来写，不要只堆通用风格词：\n"
+    "  1. 必须是中国民乐、纯器乐 instrumental、no vocals（绝不能有人声/歌词）。\n"
+    "  2. 必须有 1-2 个『情景/氛围』短语，从 ta 回答里的处境/画面/动作化用而来（如黄昏海边、欲言又止、人散后独处），\n"
+    "     转成音乐能表达的画面感与情绪张力——这是重点，别只写通用风格词；但不要原样复述句子、不要出现任何中文。\n"
+    "  3. 结合你判断的主/副情绪，参考下表对应桶的乐器/调式/BPM/技法；按 intensity 调力度（弱=克制亲密、留白，强=饱满浓烈）；按 tempo 调快慢。\n"
+    "  4. 40-70 个英文词，逗号分隔的描述短语（风格 + 乐器 + 调式/速度 + 情景意象 + 情绪 + 演奏技法 + no vocals）。\n"
+    "示例（仅示范『情景+技法』的写法与浓度，绝不要照抄内容）：\n"
+    "  Chinese folk instrumental, solo erhu over sparse guqin, D-yu pentatonic, slow ~58 BPM, "
+    "the ache of words held back at dusk by an emptying shore, weeping portamento and long breathing silences, "
+    "intimate and restrained, no vocals\n"
+    "九桶风格锚点（按你判断的主情绪选用，并据 ta 的具体情绪个性化，不要照抄）：\n"
+    + _STYLE_ANCHORS
 )
 
 _DIM_ORDER = ["独处_共处", "涌动_平静", "直说_含蓄", "回望过去_望向远方"]
@@ -129,10 +145,22 @@ class StepFunAnalysis(AnalysisService):
                 "tempo": data.get("tempo"),
                 "keywords": data.get("keywords") or [],
                 "bucket_params": {k: main.get(k) for k in ("mode", "bpm", "instrument", "technique", "suno_tags")},
-                # 揉进情绪（主桶+副桶+强度+快慢）的成品 Suno 描述，music.py 直接用、也便于调试落库
-                "suno_prompt": buckets.build_prompt(dist, data.get("intensity"), data.get("tempo")),
+                # 给 Suno 的成品描述：优先用 LLM 按本人情绪写的 music_prompt；缺失退回桶模板拼装
+                "suno_prompt": _pick_music_prompt(data, dist),
             },
         )
+
+
+def _pick_music_prompt(data: Dict, dist: Dict[str, float]) -> str:
+    """优先用 LLM 按本人情绪写的 music_prompt；为空/异常退回桶模板。
+    并兜底保证 instrumental / no vocals（防 Suno 自作主张加人声）。"""
+    p = (data.get("music_prompt") or "").strip()
+    if not p or len(p) < 12:
+        return buckets.build_prompt(dist, data.get("intensity"), data.get("tempo"))
+    low = p.lower()
+    if "no vocal" not in low and "instrumental" not in low:
+        p += ", instrumental, no vocals"
+    return p
 
 
 def _strip_fence(s: str) -> str:

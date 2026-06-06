@@ -18,7 +18,9 @@
 
 **关键 2：音乐生成必须串行（单一队列）。** suno-api 是「一个浏览器 + 一个 Suno 账号」的单一共享资源，**不能多人并发驱动**（会抢同一个浏览器；而且靠「快照差分」取回新曲，多首并行就分不清谁的）。所以后端把音乐生成全部丢进 **单一 FIFO 队列 `_MUSIC_Q` + 唯一 worker `_music_worker_loop`**（`server/app/api/routes_generate.py`），一首首出。分析照旧并行、结果页秒出；**同一时刻只一首在生成 → 快照差分无歧义 → 谁的曲子绝不拿错。**
 
-**关键 3：prompt 揉进了分析情绪。** `buckets.build_prompt(dist, intensity, tempo)`：主桶 `suno_tags` 做骨架（调式/BPM/主乐器/情绪词/技法/no vocals），叠加**副桶（权重≥0.2→`undercurrent of …`）+ 强度（弱=克制亲密 / 强=强烈饱满）+ 快慢**。成品在分析阶段算好、存 `result.raw.suno_prompt`（落库便于调试），`SunoMusic._build_prompt` 直接取用。
+**关键 3：prompt 由 LLM『按本人情绪』来写，不是套固定模板。** 分析阶段让阶跃在 JSON 里多输出一个 `music_prompt`：要求它必须**纯器乐 no vocals**、结合主/副情绪参考九桶的乐器/调式/BPM/技法、并**化用 ta 回答里的处境/画面写出 1-2 个情景氛围短语**（不复述原句、不出现中文），40-70 词。这样每个人的 prompt 都落到自己的具体情绪与情景上（如「the quiet ache of an emptying shore at dusk」），而不是「solo guzheng, pentatonic, no vocals」这种缸装通用词。
+- 成品存 `result.raw.suno_prompt`（落库便于调试），`SunoMusic._build_prompt` 直接取用。
+- **兜底**：LLM 没给 `music_prompt`（或分析回退占位）时，退回确定性模板 `buckets.build_prompt(dist, intensity, tempo)`（主桶 suno_tags + 副桶 undercurrent + 强度 + 快慢）；并兜底保证含 `instrumental/no vocals`，防 Suno 加人声。
 
 ## 二、跑起来需要什么
 
