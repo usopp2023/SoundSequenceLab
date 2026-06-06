@@ -1,9 +1,10 @@
 """测试隔离：强制用占位分析/音乐，避免冒烟测试打真实外部 API（阶跃/Suno）。"""
 import pytest
 
-from app.api import routes_generate
+from app.api import routes_generate, routes_upload
 from app.services.analysis import PlaceholderAnalysis
 from app.services.music import PlaceholderMusic
+from app.services.asr import PlaceholderASR
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -12,4 +13,5 @@ def _offline_services():
     routes_generate.analysis_service = PlaceholderAnalysis()
     routes_generate.music_service = PlaceholderMusic()
     routes_generate.fallback_music = PlaceholderMusic()
+    routes_upload.asr_service = PlaceholderASR()
     yield

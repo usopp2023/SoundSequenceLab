@@ -76,3 +76,35 @@ def top2(dist: Dict[str, float]):
     """返回 (主桶, 副桶)；副桶用于影响副乐器/变奏（阶段 2）。"""
     ranked = sorted(BUCKETS, key=lambda b: float((dist or {}).get(b["key"], 0) or 0), reverse=True)
     return ranked[0], (ranked[1] if len(ranked) > 1 else ranked[0])
+
+
+def build_prompt(dist: Dict[str, float], intensity=None, tempo: str = "") -> str:
+    """把『分析出来的情绪』揉进给 Suno 的描述。
+
+    主桶 suno_tags 做骨架（调式/BPM/主乐器/情绪/技法/no vocals），再叠加：
+    - 副桶（权重≥0.2 且≠主桶）→ 一句『暗流』，让复合情绪体现出来；
+    - 强度 intensity → 收/放的力度提示（弱=克制亲密，强=强烈饱满）；
+    - tempo（LLM 给的整体快慢）→ 语义化快慢提示。
+    无分布时回退中性。
+    """
+    main, second = top2(dist or {})
+    parts = [main["suno_tags"]]
+
+    sw = float((dist or {}).get(second["key"], 0) or 0)
+    if second["key"] != main["key"] and sw >= 0.2:
+        parts.append(f"with a subtle undercurrent of {second['en'].lower()}")
+
+    try:
+        iv = float(intensity)
+        if iv <= 0.34:
+            parts.append("restrained, intimate dynamics")
+        elif iv >= 0.67:
+            parts.append("intense, expressive dynamics, fuller arrangement")
+    except (TypeError, ValueError):
+        pass
+
+    tempo_hint = {"slow": "unhurried tempo", "fast": "lively tempo"}.get((tempo or "").strip())
+    if tempo_hint:
+        parts.append(tempo_hint)
+
+    return ", ".join(parts)

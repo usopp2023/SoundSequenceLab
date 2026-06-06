@@ -69,7 +69,12 @@ class SunoMusic(MusicService):
     def _build_prompt(self, analysis: AnalysisResult) -> str:
         raw = analysis.raw or {}
         params = raw.get("bucket_params") or {}
-        return params.get("suno_tags") or "Chinese folk instrumental, solo guzheng, pentatonic, no vocals"
+        # 优先用分析阶段揉好情绪（主桶+副桶+强度+快慢）的成品描述；缺失再退回主桶 tags
+        return (
+            raw.get("suno_prompt")
+            or params.get("suno_tags")
+            or "Chinese folk instrumental, solo guzheng, pentatonic, no vocals"
+        )
 
     def _get_clips(self) -> List[dict]:
         # /api/get 经代理调 Suno，时通时断；重试几次，拿到合法 JSON 列表才算

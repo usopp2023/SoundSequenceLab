@@ -129,6 +129,8 @@ class StepFunAnalysis(AnalysisService):
                 "tempo": data.get("tempo"),
                 "keywords": data.get("keywords") or [],
                 "bucket_params": {k: main.get(k) for k in ("mode", "bpm", "instrument", "technique", "suno_tags")},
+                # 揉进情绪（主桶+副桶+强度+快慢）的成品 Suno 描述，music.py 直接用、也便于调试落库
+                "suno_prompt": buckets.build_prompt(dist, data.get("intensity"), data.get("tempo")),
             },
         )
 

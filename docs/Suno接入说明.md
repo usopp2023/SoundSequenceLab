@@ -6,14 +6,19 @@
 ## 一、它怎么工作（架构）
 
 ```
-小程序/现场机 → FastAPI 后端（异步 worker）
-   ├─ 阶跃星辰 API（情绪分析，走系统代理直达）
-   └─ suno-api（本地 :3000，有头浏览器）→ Suno（经 Clash 代理）
-        后端再经代理从 cdn1.suno.ai 下载 mp3 → 转存 /static/generated
+小程序/现场机 → FastAPI 后端
+   ├─ 分析（并行）：阶跃星辰 API（情绪分析，走系统代理直达）→ 结果页秒出人格
+   └─ 音乐（单一直列队列 _MUSIC_Q，唯一 worker 一首首串行）
+        → suno-api（本地 :3000，有头浏览器）→ Suno（经 Clash 代理）
+        后端再经代理从 cdn1.suno.ai 下载 mp3 → 转存 /static/generated → 结果页点亮
 ```
 
-**关键：不是用 suno-api 的 API token 流程**（那条被 Suno 改版+hCaptcha 打死了）。
-我们走的是 **`/api/ui_generate`：有头浏览器把我们的 9 桶 tags 输进 suno.com 创作框 → 点 Create → Suno 真生成**（有头模式下无感 hCaptcha 自动通过，**不需要 2captcha**）→ 后端轮询 `/api/get` 取回新曲 → 代理下载转存。
+**关键 1：不是用 suno-api 的 API token 流程**（那条被 Suno 改版+hCaptcha 打死了）。
+我们走的是 **`/api/ui_generate`：有头浏览器把「揉进情绪的 prompt」输进 suno.com 创作框 → 点 Create → Suno 真生成**（有头模式下无感 hCaptcha 自动通过，**不需要 2captcha**）→ 后端轮询 `/api/get` 取回新曲 → 代理下载转存。
+
+**关键 2：音乐生成必须串行（单一队列）。** suno-api 是「一个浏览器 + 一个 Suno 账号」的单一共享资源，**不能多人并发驱动**（会抢同一个浏览器；而且靠「快照差分」取回新曲，多首并行就分不清谁的）。所以后端把音乐生成全部丢进 **单一 FIFO 队列 `_MUSIC_Q` + 唯一 worker `_music_worker_loop`**（`server/app/api/routes_generate.py`），一首首出。分析照旧并行、结果页秒出；**同一时刻只一首在生成 → 快照差分无歧义 → 谁的曲子绝不拿错。**
+
+**关键 3：prompt 揉进了分析情绪。** `buckets.build_prompt(dist, intensity, tempo)`：主桶 `suno_tags` 做骨架（调式/BPM/主乐器/情绪词/技法/no vocals），叠加**副桶（权重≥0.2→`undercurrent of …`）+ 强度（弱=克制亲密 / 强=强烈饱满）+ 快慢**。成品在分析阶段算好、存 `result.raw.suno_prompt`（落库便于调试），`SunoMusic._build_prompt` 直接取用。
 
 ## 二、跑起来需要什么
 
@@ -48,6 +53,8 @@
 ## 四、局限 / 后续（务必知道）
 
 - **有头浏览器**：每次生成弹一个浏览器窗口、约 2-3 分钟/首；机器要有屏幕 + 挂 Clash。适合 dev/小规模，不适合无人服务器。
+- **吞吐天花板（单账号直列）**：因为串行队列，**同一时刻只出一首**，单账号约 **20-30 首/小时**；N 人同时答，第 N 首约等 N×2-3min（线下排队可接受）。要更高并发：① suno-api 多账号/多浏览器实例 + 多 worker，② 换 ACE-Step（GPU 批量、并行、免费），③ 托管 Suno API（并行）。见 `音乐生成方案选型.md`。
+- **可选体验优化（未做）**：结果页显示「前面还有 N 首在排队」。做法：加 `music_status='queued'` + 返回 `_MUSIC_Q.qsize()` 估算的队列位置。
 - **cookie 会过期**：失效后要重新登录 suno.com 取 cookie 填回。
 - **Suno 改版风险**：UI 一改 `uiGenerate` 选择器可能失效（按 §三.3 重抓）。团队判断短期不会改。
 - **duration**：取的是 `streaming` 状态的时长字段（可能是占位 30），不影响播放，仅时间标签显示。要准确可改成等 `complete`。
@@ -55,8 +62,8 @@
 
 ## 五、代码落点
 
-- 后端 `server/app/services/buckets.py`：9 桶情绪本体（调式/BPM/乐器/技法/suno_tags）。
-- 后端 `server/app/services/analysis.py`：`StepFunAnalysis`（阶跃，输出 9 桶 + 人格/四维/报告）。
-- 后端 `server/app/services/music.py`：`SunoMusic`（ui_generate 触发 → 轮询 `/api/get` → 代理下载转存；失败回退兜底曲）。
-- 后端 `server/app/api/routes_generate.py`：异步 worker（分析先出，音乐后台出）。
+- 后端 `server/app/services/buckets.py`：9 桶情绪本体（调式/BPM/乐器/技法/suno_tags）+ `build_prompt()`（揉进副桶/强度/快慢）。
+- 后端 `server/app/services/analysis.py`：`StepFunAnalysis`（阶跃，输出 9 桶 + 人格/四维/报告，并算好 `raw.suno_prompt`）。
+- 后端 `server/app/services/music.py`：`SunoMusic`（`_build_prompt` 取 `raw.suno_prompt` → ui_generate 触发 → 轮询 `/api/get` → 代理下载转存；失败回退兜底曲）。
+- 后端 `server/app/api/routes_generate.py`：分析并行先出；音乐进**单一直列队列 `_MUSIC_Q`**，由唯一 `_music_worker_loop` 一首首串行出。
 - suno-api（本地、gitignore）：`uiGenerate()` + `/api/ui_generate` + 浏览器代理补丁。
