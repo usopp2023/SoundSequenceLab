@@ -30,7 +30,9 @@ DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{PROJECT_DIR / 'shengxu.db'
 WECHAT_APPID = os.getenv("WECHAT_APPID", "")
 WECHAT_SECRET = os.getenv("WECHAT_SECRET", "")
 ANALYSIS_API_KEY = os.getenv("ANALYSIS_API_KEY", "")
-ANALYSIS_API_BASE = os.getenv("ANALYSIS_API_BASE", "")
+# 阶跃星辰 OpenAI 兼容端点 + 模型（.env 留空时用默认）
+ANALYSIS_API_BASE = os.getenv("ANALYSIS_API_BASE") or "https://api.stepfun.com/v1"
+ANALYSIS_MODEL = os.getenv("ANALYSIS_MODEL") or "step-2-16k"
 SUNO_API_KEY = os.getenv("SUNO_API_KEY", "")
 SUNO_API_BASE = os.getenv("SUNO_API_BASE", "")
 
