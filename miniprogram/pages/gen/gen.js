@@ -2,7 +2,7 @@ const { request } = require('../../utils/request');
 const nav = require('../../utils/nav');
 
 const GEN_STEPS = ['正在听你说的话……', '读出你藏起来的情绪……', '正在谱一段曲子……'];
-const POLL_TIMEOUT_MS = 15000; // 轮询最长 15s，超时进失败态
+const POLL_TIMEOUT_MS = 60000; // 分析最长 60s（阶跃约 20s），超时进失败态；音乐在结果页异步出
 
 Page({
   data: { statusBar: 20, genText: GEN_STEPS[0], failed: false },
@@ -38,7 +38,9 @@ Page({
       .then((res) => {
         if (this.cancelled) return;
         if (res && res.steps && res.steps.length) this.steps = res.steps;
-        if (res && res.status === 'done' && res.result) {
+        if (res && res.status === 'error') {
+          this.fail();
+        } else if (res && res.status === 'done' && res.result) {
           this.result = res.result;
           this.tryFinish();
         } else if (Date.now() > this.deadline) {

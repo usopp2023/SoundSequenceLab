@@ -20,6 +20,7 @@ class Dim(BaseModel):
 class Music(BaseModel):
     url: str
     duration: int
+    status: str = "ready"      # ready | generating（Suno 异步出曲时）
 
 
 class Result(BaseModel):

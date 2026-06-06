@@ -42,6 +42,7 @@ class ResultRow(SQLModel, table=True):
     music_url: str
     music_duration: int
     curve_url: str = ""
+    music_status: str = "ready"     # ready | generating（Suno 异步出曲时）
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
 
@@ -62,6 +63,17 @@ class ClaimCode(SQLModel, table=True):
 # ---------------- 引擎 / 会话 ----------------
 def init_db() -> None:
     SQLModel.metadata.create_all(_engine)
+    _migrate()
+
+
+def _migrate() -> None:
+    """对已存在的旧库做轻量迁移：缺列就 ADD COLUMN（SQLite 支持）。"""
+    from sqlalchemy import text
+    with _engine.connect() as conn:
+        cols = {r[1] for r in conn.execute(text("PRAGMA table_info(resultrow)"))}
+        if "music_status" not in cols:
+            conn.execute(text("ALTER TABLE resultrow ADD COLUMN music_status VARCHAR DEFAULT 'ready'"))
+            conn.commit()
 
 
 def get_session() -> Session:
@@ -140,6 +152,7 @@ def save_result(
     music_url: str,
     music_duration: int,
     curve_url: str = "",
+    music_status: str = "ready",
 ) -> None:
     with get_session() as s:
         s.add(ResultRow(
@@ -152,7 +165,21 @@ def save_result(
             music_url=music_url,
             music_duration=music_duration,
             curve_url=curve_url,
+            music_status=music_status,
         ))
+        s.commit()
+
+
+def update_music(result_id: str, music_url: str, music_duration: int, music_status: str = "ready") -> None:
+    """Suno 异步出曲完成后回填音乐（或失败兜底）。"""
+    with get_session() as s:
+        row = s.exec(select(ResultRow).where(ResultRow.result_id == result_id)).first()
+        if not row:
+            return
+        row.music_url = music_url
+        row.music_duration = music_duration
+        row.music_status = music_status
+        s.add(row)
         s.commit()
 
 

@@ -12,6 +12,8 @@
   padding: 28rpx 32rpx; border: 1rpx solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
 }
 .player-press { opacity: .96; }
+.player.gen { opacity: .9; }
+.player.gen .play-btn { background-color: #9a9792; }
 .play-btn {
   width: 92rpx; height: 92rpx; border-radius: 50%;
   background-color: #1c1b1a; color: #fff;

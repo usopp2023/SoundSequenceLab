@@ -19,7 +19,8 @@ STATIC_DIR = BASE_DIR / "static"
 UPLOADS_DIR = STATIC_DIR / "uploads"
 FALLBACK_MUSIC_DIR = STATIC_DIR / "fallback_music"
 CURVES_DIR = STATIC_DIR / "curves"
-for _d in (STATIC_DIR, UPLOADS_DIR, FALLBACK_MUSIC_DIR, CURVES_DIR):
+GENERATED_DIR = STATIC_DIR / "generated"          # Suno 出曲转存到这里
+for _d in (STATIC_DIR, UPLOADS_DIR, FALLBACK_MUSIC_DIR, CURVES_DIR, GENERATED_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
 # ---- 可配置项（环境变量优先）----
@@ -34,7 +35,9 @@ ANALYSIS_API_KEY = os.getenv("ANALYSIS_API_KEY", "")
 ANALYSIS_API_BASE = os.getenv("ANALYSIS_API_BASE") or "https://api.stepfun.com/v1"
 ANALYSIS_MODEL = os.getenv("ANALYSIS_MODEL") or "step-2-16k"
 SUNO_API_KEY = os.getenv("SUNO_API_KEY", "")
-SUNO_API_BASE = os.getenv("SUNO_API_BASE", "")
+# suno-api（gcui-art）本地服务地址；SUNO_ENABLED=1 时才真正调 Suno，否则音乐走兜底
+SUNO_API_BASE = os.getenv("SUNO_API_BASE") or "http://localhost:3000"
+SUNO_ENABLED = (os.getenv("SUNO_ENABLED") or "").strip() in ("1", "true", "True", "yes")
 
 
 def static_url(relative: str) -> str:

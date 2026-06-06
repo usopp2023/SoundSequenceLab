@@ -11,14 +11,14 @@
       <view class="placeholder-note">TODO: 设计师统一出图</view>
     </view>
 
-    <view class="player {{playing ? 'playing' : ''}}" hover-class="player-press" bindtap="togglePlay">
-      <view class="play-btn">{{playing ? '❚❚' : '▶'}}</view>
+    <view class="player {{playing ? 'playing' : ''}} {{musicGenerating ? 'gen' : ''}}" hover-class="player-press" bindtap="togglePlay">
+      <view class="play-btn">{{musicGenerating ? '⋯' : (playing ? '❚❚' : '▶')}}</view>
       <view class="play-meta">
-        <view class="t1">为你生成的曲子 · demo</view>
+        <view class="t1">{{musicGenerating ? '民乐生成中…稍后回来听' : '为你生成的曲子'}}</view>
         <view class="wave">
           <view class="bar" wx:for="{{waveBars}}" wx:key="index" style="height:{{item}}%"></view>
         </view>
-        <view class="t2">{{playTimeLabel}}</view>
+        <view class="t2">{{musicGenerating ? '约 1–2 分钟，好了会自动点亮' : playTimeLabel}}</view>
       </view>
     </view>
 
